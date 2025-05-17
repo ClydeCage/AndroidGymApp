@@ -1,0 +1,53 @@
+<resources>
+    <string name="app_name">HaDongGymApp</string>
+    <!-- MainActivity -->
+    <string name="main_activity_title">Phòng Gym Hà Đông</string>
+    <string name="toast_gym_selected">Bạn đã chọn: %1$s</string> <!-- %1$s là placeholder cho tên -->
+
+    <!-- GymDetailActivity -->
+    <string name="gym_detail_activity_title">Chi Tiết Phòng Gym</string>
+    <string name="label_address_prefix">Địa chỉ: </string>
+    <string name="label_phone_prefix">Điện thoại: </string>
+    <string name="label_description_prefix">Mô tả: </string>
+    <string name="default_description_gym">Đây là một phòng tập tuyệt vời với nhiều trang thiết bị hiện đại và không gian thoáng đãng. Huấn luyện viên nhiệt tình và chuyên nghiệp. Phù hợp cho mọi đối tượng.</string>
+    <string name="error_loading_gym_details">Không thể tải dữ liệu chi tiết.</string>
+    <string name="gym_phone_not_available">Chưa có thông tin số điện thoại.</string>
+
+    <!-- list_item_gym.xml (dành cho tools:text, nếu cần) -->
+    <string name="placeholder_gym_name">Tên Phòng Gym</string>
+    <string name="placeholder_gym_address">Địa chỉ phòng gym</string>
+    <string name="placeholder_gym_phone">Số điện thoại</string>
+
+    <string name="no_gyms_found">Không có phòng gym nào được tìm thấy.</string>
+    <string name="error_loading_data_check_connection">Lỗi tải dữ liệu. Vui lòng kiểm tra kết nối mạng và thử lại.</string>
+
+    <string name="menu_title_search">Tìm kiếm</string>
+    <string name="menu_title_logout">Đăng xuất</string>
+
+    <string name="title_register">Tạo tài khoản mới</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Mật khẩu</string>
+    <string name="hint_confirm_password">Xác nhận mật khẩu</string>
+    <string name="button_register">Đăng ký</string>
+    <string name="text_go_to_login">Đã có tài khoản? Đăng nhập ngay</string>
+
+    <string name="title_login">Đăng nhập</string>
+    <string name="button_login">Đăng nhập</string>
+    <string name="text_go_to_register">Chưa có tài khoản? Tạo tài khoản mới</string>
+    <string name="text_forgot_password">Quên mật khẩu?</string>
+
+    <string name="error_registration_failed_default">Đăng ký thất bại. Vui lòng thử lại.</string>
+    <string name="error_email_already_in_use">Địa chỉ email này đã được sử dụng.</string>
+    <string name="error_invalid_credentials_register">Email hoặc mật khẩu không hợp lệ (mật khẩu cần ít nhất 6 ký tự).</string>
+    <string name="error_network_issue">Lỗi kết nối mạng. Vui lòng kiểm tra lại.</string>
+
+    <string name="error_login_failed_default">Đăng nhập thất bại. Vui lòng thử lại.</string>
+    <string name="error_user_not_found">Tài khoản không tồn tại.</string>
+    <string name="error_wrong_password_or_email">Sai email hoặc mật khẩu.</string>
+
+    <string name="toast_reset_email_failed_default">Gửi yêu cầu đặt lại mật khẩu thất bại.</string>
+    <string name="error_email_not_found_for_reset">Không tìm thấy tài khoản nào với email này.</string>
+
+
+
+</resources>

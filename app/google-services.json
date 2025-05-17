@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "50624082894",
+    "project_id": "hadong-gym-app",
+    "storage_bucket": "hadong-gym-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:50624082894:android:b5d467fddd83aee616319f",
+        "android_client_info": {
+          "package_name": "com.example.hadonggymapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwRoRt22nJjbtoVyyeHdBQYa2-IES4-cI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
