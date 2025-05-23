@@ -121,19 +121,13 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
     @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) { // Chuyển lên trên để gần onCreateOptionsMenu
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
 
-        // Bỏ qua action_search_gym vì nó được xử lý bởi setOnActionExpandListener
-        // if (id == R.id.action_search_gym) {
-        //     return true;
-        // } else
-        if (id == R.id.action_logout) {
-            mAuth.signOut();
-            Toast.makeText(MainActivity.this, "Đã đăng xuất.", Toast.LENGTH_SHORT).show();
-            goToLoginActivity();
+        if (id == R.id.action_user_profile) {
+            Intent intent = new Intent(MainActivity.this, UserProfileActivity.class);
+            startActivity(intent);
             return true;
         }
         return super.onOptionsItemSelected(item);

@@ -13,6 +13,7 @@ googleGmsGoogleServices = "4.4.2"
 # firebaseFirestore = "25.1.4" # << Xóa hoặc comment dòng này
 firebaseBom = "33.11.0"  # << THÊM DÒNG NÀY - Kiểm tra phiên bản BoM mới nhất trên trang Firebase docs!
 swiperefreshlayout = "1.1.0"
+firebaseStorage = "21.0.2"
 
 [libraries]
 cardview = { module = "androidx.cardview:cardview", version.ref = "cardview" }
@@ -30,6 +31,7 @@ firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 
 swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version.ref = "swiperefreshlayout" }
+firebase-storage = { group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

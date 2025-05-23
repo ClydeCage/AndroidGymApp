@@ -13,49 +13,117 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <ImageView
-            android:id="@+id/imageViewDetailGym"
+        <!-- Image Slider (ViewPager2) -->
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPagerGymImages"
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:scaleType="centerCrop"
-            tools:srcCompat="@tools:sample/backgrounds/scenic" />
-        <!-- Ảnh placeholder, sẽ thay bằng ảnh thật -->
+            android:layout_marginBottom="16dp"/>
 
+        <!-- Indicators (optional, can add later if needed) -->
+
+        <!-- Tên phòng gym -->
         <TextView
-            android:id="@+id/textViewDetailGymName"
+            android:id="@+id/textViewGymName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:text="@string/placeholder_gym_name"
+            tools:text="Tên Phòng Gym"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:textColor="@android:color/black"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginBottom="8dp"/>
 
+        <!-- Địa chỉ -->
         <TextView
-            android:id="@+id/textViewDetailGymAddress"
+            android:id="@+id/textViewGymAddress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:text="@string/label_address_prefix"
+            tools:text="Địa chỉ: 123 Đường ABC, Quận XYZ"
             android:textSize="16sp"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginBottom="8dp"/>
 
+        <!-- Số điện thoại -->
         <TextView
-            android:id="@+id/textViewDetailGymPhone"
+            android:id="@+id/textViewGymPhone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:text="@string/label_phone_prefix"
+            tools:text="Điện thoại: 0987654321"
             android:textSize="16sp"
-            android:layout_marginTop="8dp"
-            android:autoLink="phone"/> <!-- Tự động nhận diện và cho phép gọi điện -->
+            android:layout_marginBottom="8dp"/>
 
-        <!-- Bạn có thể thêm các TextView khác cho giờ mở cửa, mô tả, tiện ích, v.v. -->
+        <!-- Giờ mở cửa -->
         <TextView
-            android:id="@+id/textViewDetailDescription"
+            android:id="@+id/textViewGymHours"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:text="@string/label_description_prefix"
+            tools:text="Giờ mở cửa: 6:00 - 22:00 hàng ngày"
             android:textSize="16sp"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Mô tả -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Mô tả:"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp"/>
+        <TextView
+            android:id="@+id/textViewGymDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="Đây là mô tả chi tiết về phòng gym..."
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Dịch vụ -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Dịch vụ:"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp"/>
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupServices"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:chipSpacingHorizontal="8dp"
+            app:chipSpacingVertical="4dp"/>
+
+        <!-- Tiện ích -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tiện ích:"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp"/>
+         <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupAmenities"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+             app:chipSpacingHorizontal="8dp"
+            app:chipSpacingVertical="4dp"/>
+
+        <!-- Các nút hành động -->
+        <Button
+            android:id="@+id/buttonCall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Gọi điện"
+            android:layout_marginBottom="8dp"/>
+
+        <Button
+            android:id="@+id/buttonDirection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Chỉ đường"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Bạn có thể thêm nút Đăng ký tập thử, Đánh giá... -->
 
     </LinearLayout>
+
 </ScrollView>

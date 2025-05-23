@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:gravity="center_horizontal"
+    android:fitsSystemWindows="true"
+    android:layout_marginTop="?attr/actionBarSize"
+    tools:context=".UserProfileActivity">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/imageViewUserProfile"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginBottom="16dp"
+        app:civ_border_width="2dp"
+        app:civ_border_color="@color/white"
+        android:src="@drawable/ic_person" />
+
+    <TextView
+        android:id="@+id/textViewUserName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Tên Người Dùng"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:id="@+id/textViewUserEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="email@example.com"
+        android:textSize="16sp"
+        android:layout_marginBottom="24dp"/>
+
+    <Button
+        android:id="@+id/buttonEditProfile"
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:text="Chỉnh sửa thông tin"
+        android:layout_marginBottom="8dp"/>
+
+    <Button
+        android:id="@+id/buttonChangePassword"
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:text="Thay đổi mật khẩu"
+        android:layout_marginBottom="8dp"/>
+
+    <Button
+        android:id="@+id/buttonLogoutProfile"
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@android:color/holo_red_light"
+        android:text="Đăng xuất" />
+
+</LinearLayout>

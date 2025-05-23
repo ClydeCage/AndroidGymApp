@@ -4,14 +4,15 @@
 
     <item
         android:id="@+id/action_search_gym"
-        android:icon="@android:drawable/ic_menu_search"
-        android:title="@string/menu_title_search"
-        app:showAsAction="ifRoom|collapseActionView"
-        app:actionViewClass="androidx.appcompat.widget.SearchView" />
+        android:icon="@drawable/ic_search"
+        android:title="Tìm kiếm"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="ifRoom|collapseActionView" />
 
     <item
-        android:id="@+id/action_logout"
-        android:title="@string/menu_title_logout"
-        app:showAsAction="never" />
+        android:id="@+id/action_user_profile"
+        android:icon="@drawable/ic_person"
+        android:title="Thông tin người dùng"
+        app:showAsAction="ifRoom" />
 
 </menu>

@@ -44,6 +44,8 @@ dependencies {
     implementation(libs.glide)
     implementation(libs.cardview)
     implementation(libs.swiperefreshlayout)
+    implementation("de.hdodenhof:circleimageview:3.1.0")
+    implementation(libs.firebase.storage)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
