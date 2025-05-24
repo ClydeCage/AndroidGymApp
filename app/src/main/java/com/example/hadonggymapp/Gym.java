@@ -15,6 +15,7 @@ public class Gym implements Serializable {
     private List<String> imageUrls; // Danh sách các ảnh khác của phòng gym
     private double latitude; // Thêm tọa độ
     private double longitude; // Thêm tọa độ
+    private String id;
 
     // Constructor rỗng - RẤT QUAN TRỌNG cho Firebase Firestore
     public Gym() {
@@ -80,6 +81,10 @@ public class Gym implements Serializable {
         return longitude;
     }
 
+    public String getId() {
+        return id;
+    }
+
     // Setters - Firebase cũng cần setters để gán giá trị
     public void setName(String name) {
         this.name = name;
@@ -123,5 +128,9 @@ public class Gym implements Serializable {
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

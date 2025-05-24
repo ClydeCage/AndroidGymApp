@@ -165,6 +165,7 @@ public class MainActivity extends AppCompatActivity {
                     for (com.google.firebase.firestore.DocumentSnapshot document : snapshots.getDocuments()) {
                         Gym gym = document.toObject(Gym.class);
                         if (gym != null) {
+                            gym.setId(document.getId());
                             originalGymList.add(gym);
                         }
                     }

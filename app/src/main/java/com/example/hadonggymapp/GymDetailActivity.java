@@ -19,6 +19,7 @@ import android.view.View;
 import com.bumptech.glide.Glide;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.button.MaterialButton;
 
 import java.util.List;
 
@@ -74,6 +75,7 @@ public class GymDetailActivity extends AppCompatActivity {
             }
             displayGymDetails(currentGym);
             setupButtonListeners(currentGym);
+            setupUI();
 
             // Xử lý click vào ảnh map tĩnh để mở chỉ đường
             imageViewStaticMap.setOnClickListener(v -> openGoogleMapsDirection(currentGym));
@@ -184,6 +186,16 @@ public class GymDetailActivity extends AppCompatActivity {
         }
 
         // TODO: Add listeners for other buttons like Register Trial, Rate, etc.
+    }
+
+    private void setupUI() {
+        // Add Schedule Button
+        MaterialButton buttonSchedule = findViewById(R.id.buttonSchedule);
+        buttonSchedule.setOnClickListener(v -> {
+            Intent intent = new Intent(GymDetailActivity.this, ScheduleWorkoutActivity.class);
+            intent.putExtra("gym", currentGym);
+            startActivity(intent);
+        });
     }
 
     // Hàm tạo URL cho Google Static Maps API
