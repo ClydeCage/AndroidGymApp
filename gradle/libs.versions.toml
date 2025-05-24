@@ -14,10 +14,12 @@ googleGmsGoogleServices = "4.4.2"
 firebaseBom = "33.11.0"  # << THÊM DÒNG NÀY - Kiểm tra phiên bản BoM mới nhất trên trang Firebase docs!
 swiperefreshlayout = "1.1.0"
 firebaseStorage = "21.0.2"
+playServicesMaps = "19.2.0"
 
 [libraries]
 cardview = { module = "androidx.cardview:cardview", version.ref = "cardview" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
+glide-compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "glide" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -32,6 +34,7 @@ firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 
 swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version.ref = "swiperefreshlayout" }
 firebase-storage = { group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage" }
+play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

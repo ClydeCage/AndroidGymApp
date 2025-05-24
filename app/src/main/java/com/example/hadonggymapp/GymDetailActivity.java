@@ -7,6 +7,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -24,6 +25,7 @@ import java.util.List;
 public class GymDetailActivity extends AppCompatActivity {
 
     public static final String EXTRA_GYM_OBJECT = "extra_gym_object";
+    private static final String GOOGLE_STATIC_MAPS_API_KEY = "AIzaSyCNjS903Rm1M9vDcZ_lL-xCWDQRWwlv1bQ"; // <-- Thay YOUR_API_KEY bằng API Key của bạn
 
     // Khai báo các View từ layout activity_gym_detail.xml
     private ViewPager2 viewPagerGymImages;
@@ -34,8 +36,11 @@ public class GymDetailActivity extends AppCompatActivity {
     private TextView textViewGymDescription;
     private ChipGroup chipGroupServices;
     private ChipGroup chipGroupAmenities;
+    private ImageView imageViewStaticMap; // Thêm ImageView cho static map
     private Button buttonCall;
     private Button buttonDirection;
+
+    private Gym currentGym;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,18 +61,23 @@ public class GymDetailActivity extends AppCompatActivity {
         textViewGymDescription = findViewById(R.id.textViewGymDescription);
         chipGroupServices = findViewById(R.id.chipGroupServices);
         chipGroupAmenities = findViewById(R.id.chipGroupAmenities);
+        imageViewStaticMap = findViewById(R.id.imageViewStaticMap); // Ánh xạ ImageView
         buttonCall = findViewById(R.id.buttonCall);
         buttonDirection = findViewById(R.id.buttonDirection);
 
         // Lấy dữ liệu Gym object từ Intent
-        Gym gym = (Gym) getIntent().getSerializableExtra(EXTRA_GYM_OBJECT);
+        currentGym = (Gym) getIntent().getSerializableExtra(EXTRA_GYM_OBJECT);
 
-        if (gym != null) {
+        if (currentGym != null) {
             if (getSupportActionBar() != null) {
-                getSupportActionBar().setTitle(gym.getName());
+                getSupportActionBar().setTitle(currentGym.getName());
             }
-            displayGymDetails(gym);
-            setupButtonListeners(gym);
+            displayGymDetails(currentGym);
+            setupButtonListeners(currentGym);
+
+            // Xử lý click vào ảnh map tĩnh để mở chỉ đường
+            imageViewStaticMap.setOnClickListener(v -> openGoogleMapsDirection(currentGym));
+
         } else {
             Toast.makeText(this, getString(R.string.error_loading_gym_details), Toast.LENGTH_SHORT).show();
             finish();
@@ -121,6 +131,24 @@ public class GymDetailActivity extends AppCompatActivity {
         } else {
             chipGroupAmenities.setVisibility(View.GONE);
         }
+
+        // Hiển thị Static Map Image nếu có tọa độ
+        if (gym.getLatitude() != 0.0 && gym.getLongitude() != 0.0) {
+            String staticMapUrl = getStaticMapUrl(gym.getLatitude(), gym.getLongitude());
+            Log.d("StaticMapDebug", "Static Map URL: " + staticMapUrl);
+            Glide.with(this)
+                    .load(staticMapUrl)
+                    .placeholder(R.drawable.ic_person) // Placeholder tạm
+                    .error(R.drawable.ic_person) // Ảnh lỗi tạm
+                    .into(imageViewStaticMap);
+            imageViewStaticMap.setVisibility(View.VISIBLE);
+        } else {
+            imageViewStaticMap.setVisibility(View.GONE);
+            // Hiển thị lại nút Chỉ đường nếu không có tọa độ để hiển thị map tĩnh
+            if (gym.getAddress() != null && !gym.getAddress().isEmpty()) {
+                 buttonDirection.setVisibility(View.VISIBLE);
+            }
+        }
     }
 
     // Hàm helper để thêm Chips vào ChipGroup
@@ -146,23 +174,53 @@ public class GymDetailActivity extends AppCompatActivity {
             buttonCall.setVisibility(View.GONE);
         }
 
-        // Nút Chỉ đường
+        // Nút Chỉ đường (Hiển thị nếu không có tọa độ để hiển thị map tĩnh)
         if (gym.getAddress() != null && !gym.getAddress().isEmpty()) {
             buttonDirection.setOnClickListener(v -> {
-                Uri gmmIntentUri = Uri.parse("google.navigation:q=" + Uri.encode(gym.getAddress()));
-                Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
-                mapIntent.setPackage("com.google.android.apps.maps");
-                if (mapIntent.resolveActivity(getPackageManager()) != null) {
-                    startActivity(mapIntent);
-                } else {
-                    Toast.makeText(this, "Không tìm thấy ứng dụng bản đồ.", Toast.LENGTH_SHORT).show();
-                }
+                openGoogleMapsDirection(gym);
             });
         } else {
             buttonDirection.setVisibility(View.GONE);
         }
 
         // TODO: Add listeners for other buttons like Register Trial, Rate, etc.
+    }
+
+    // Hàm tạo URL cho Google Static Maps API
+    private String getStaticMapUrl(double latitude, double longitude) {
+        // Kích thước ảnh (widthxheight), zoom level (15), loại map (roadmap), marker (tọa độ, màu đỏ)
+        String size = "600x300";
+        String zoom = "15";
+        String maptype = "roadmap";
+        String markers = "color:red%7Clabel:G%7C" + latitude + "," + longitude;
+        String center = latitude + "," + longitude;
+
+        // Xây dựng URL hoàn chỉnh
+        String url = "https://maps.googleapis.com/maps/api/staticmap"
+                + "?center=" + center
+                + "&zoom=" + zoom
+                + "&size=" + size
+                + "&maptype=" + maptype
+                + "&markers=" + markers
+                + "&key=" + GOOGLE_STATIC_MAPS_API_KEY;
+
+        return url;
+    }
+
+    // Hàm mở Google Maps chỉ đường (Tái sử dụng)
+    private void openGoogleMapsDirection(Gym gym) {
+        if (gym != null && gym.getAddress() != null && !gym.getAddress().isEmpty()) {
+            Uri gmmIntentUri = Uri.parse("google.navigation:q=" + Uri.encode(gym.getAddress()));
+            Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+            mapIntent.setPackage("com.google.android.apps.maps");
+            if (mapIntent.resolveActivity(getPackageManager()) != null) {
+                startActivity(mapIntent);
+            } else {
+                Toast.makeText(this, "Không tìm thấy ứng dụng bản đồ.", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+             Toast.makeText(this, "Không có địa chỉ để chỉ đường.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     // Xử lý sự kiện khi nhấn nút "Back" trên ActionBar

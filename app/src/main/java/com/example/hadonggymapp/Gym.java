@@ -13,13 +13,15 @@ public class Gym implements Serializable {
     private List<String> services; // Các dịch vụ (Yoga, PT, Sauna...)
     private List<String> amenities; // Tiện ích (Wifi, gửi xe...)
     private List<String> imageUrls; // Danh sách các ảnh khác của phòng gym
+    private double latitude; // Thêm tọa độ
+    private double longitude; // Thêm tọa độ
 
     // Constructor rỗng - RẤT QUAN TRỌNG cho Firebase Firestore
     public Gym() {
     }
 
     // Constructor có tham số
-    public Gym(String name, String address, String phone, String imageUrl, String description, String hours, List<String> services, List<String> amenities, List<String> imageUrls) {
+    public Gym(String name, String address, String phone, String imageUrl, String description, String hours, List<String> services, List<String> amenities, List<String> imageUrls, double latitude, double longitude) {
         this.name = name;
         this.address = address;
         this.phone = phone;
@@ -29,6 +31,8 @@ public class Gym implements Serializable {
         this.services = services;
         this.amenities = amenities;
         this.imageUrls = imageUrls;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     // Getters
@@ -68,6 +72,14 @@ public class Gym implements Serializable {
         return imageUrls;
     }
 
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
     // Setters - Firebase cũng cần setters để gán giá trị
     public void setName(String name) {
         this.name = name;
@@ -103,5 +115,13 @@ public class Gym implements Serializable {
 
     public void setImageUrls(List<String> imageUrls) {
         this.imageUrls = imageUrls;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 }

@@ -44,6 +44,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".ChangePasswordActivity" android:exported="false"/>
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyAZ12Y8Fb0HItupN6k5WTrx9mVFNTWvgbc"/> <!-- Thay YOUR_API_KEY bằng API Key của bạn -->
     </application>
 
 </manifest>
