@@ -106,7 +106,7 @@ public class GymDetailActivity extends AppCompatActivity {
 
         // Hiển thị các thông tin khác
         textViewGymName.setText(gym.getName());
-        textViewGymAddress.setText("Địa chỉ: " + gym.getAddress());
+        textViewGymAddress.setText("Địa chỉ: " + (gym.getAddress() != null ? gym.getAddress() : "Đang cập nhật"));
 
         if (gym.getPhone() != null && !gym.getPhone().isEmpty()) {
             textViewGymPhone.setText("Điện thoại: " + gym.getPhone());
@@ -134,8 +134,8 @@ public class GymDetailActivity extends AppCompatActivity {
             chipGroupAmenities.setVisibility(View.GONE);
         }
 
-        // Hiển thị Static Map Image nếu có tọa độ
-        if (gym.getLatitude() != 0.0 && gym.getLongitude() != 0.0) {
+        // Hiển thị Static Map Image nếu có tọa độ hợp lệ
+        if (gym.getLatitude() != null && gym.getLongitude() != null && gym.getLatitude() != 0.0 && gym.getLongitude() != 0.0) {
             String staticMapUrl = getStaticMapUrl(gym.getLatitude(), gym.getLongitude());
             Log.d("StaticMapDebug", "Static Map URL: " + staticMapUrl);
             Glide.with(this)
@@ -199,7 +199,11 @@ public class GymDetailActivity extends AppCompatActivity {
     }
 
     // Hàm tạo URL cho Google Static Maps API
-    private String getStaticMapUrl(double latitude, double longitude) {
+    private String getStaticMapUrl(Double latitude, Double longitude) {
+        // Kiểm tra null trước khi sử dụng giá trị
+        if (latitude == null || longitude == null) {
+            return null; // Trả về null nếu tọa độ không hợp lệ
+        }
         // Kích thước ảnh (widthxheight), zoom level (15), loại map (roadmap), marker (tọa độ, màu đỏ)
         String size = "600x300";
         String zoom = "15";

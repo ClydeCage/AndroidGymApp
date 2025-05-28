@@ -67,5 +67,15 @@
                 android:layout_marginTop="4dp"
                 android:visibility="gone" />
         </LinearLayout>
+
+        <ImageView
+            android:id="@+id/imageViewDeleteGym"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="8dp"
+            android:contentDescription="Xóa phòng tập"
+            android:src="@android:drawable/ic_delete"
+            android:visibility="gone" />
+
     </LinearLayout>
 </androidx.cardview.widget.CardView>

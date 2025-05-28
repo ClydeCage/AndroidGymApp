@@ -13,8 +13,8 @@ public class Gym implements Serializable {
     private List<String> services; // Các dịch vụ (Yoga, PT, Sauna...)
     private List<String> amenities; // Tiện ích (Wifi, gửi xe...)
     private List<String> imageUrls; // Danh sách các ảnh khác của phòng gym
-    private double latitude; // Thêm tọa độ
-    private double longitude; // Thêm tọa độ
+    private Double latitude;
+    private Double longitude;
     private String id;
 
     // Constructor rỗng - RẤT QUAN TRỌNG cho Firebase Firestore
@@ -22,7 +22,7 @@ public class Gym implements Serializable {
     }
 
     // Constructor có tham số
-    public Gym(String name, String address, String phone, String imageUrl, String description, String hours, List<String> services, List<String> amenities, List<String> imageUrls, double latitude, double longitude) {
+    public Gym(String name, String address, String phone, String imageUrl, String description, String hours, List<String> services, List<String> amenities, List<String> imageUrls, Double latitude, Double longitude) {
         this.name = name;
         this.address = address;
         this.phone = phone;
@@ -73,11 +73,11 @@ public class Gym implements Serializable {
         return imageUrls;
     }
 
-    public double getLatitude() {
+    public Double getLatitude() {
         return latitude;
     }
 
-    public double getLongitude() {
+    public Double getLongitude() {
         return longitude;
     }
 
@@ -122,11 +122,11 @@ public class Gym implements Serializable {
         this.imageUrls = imageUrls;
     }
 
-    public void setLatitude(double latitude) {
+    public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
 
-    public void setLongitude(double longitude) {
+    public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
 

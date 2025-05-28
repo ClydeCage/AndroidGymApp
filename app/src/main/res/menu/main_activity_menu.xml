@@ -15,4 +15,10 @@
         android:title="Thông tin người dùng"
         app:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/action_admin"
+        android:icon="@drawable/ic_admin"
+        android:title="Quản trị viên"
+        app:showAsAction="ifRoom" />
+
 </menu>

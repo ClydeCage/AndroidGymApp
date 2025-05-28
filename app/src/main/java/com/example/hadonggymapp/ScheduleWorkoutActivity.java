@@ -115,11 +115,13 @@ public class ScheduleWorkoutActivity extends AppCompatActivity {
                 trainerList.clear();
                 for (com.google.firebase.firestore.DocumentSnapshot doc : queryDocumentSnapshots) {
                     Trainer trainer = doc.toObject(Trainer.class);
-                    android.util.Log.d("DEBUG", "Trainer loaded: " + trainer.getName() + " - " + trainer.getGymId());
-                    if (trainer.getId() == null || trainer.getId().isEmpty()) {
-                        trainer.setId(doc.getId());
+                    if (trainer != null) {
+                        android.util.Log.d("DEBUG", "Trainer loaded: " + trainer.getName());
+                        if (trainer.getId() == null || trainer.getId().isEmpty()) {
+                            trainer.setId(doc.getId());
+                        }
+                        trainerList.add(trainer);
                     }
-                    trainerList.add(trainer);
                 }
                 android.util.Log.d("DEBUG", "Total trainers loaded: " + trainerList.size());
             })

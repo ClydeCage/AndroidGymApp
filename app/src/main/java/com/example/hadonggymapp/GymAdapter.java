@@ -18,10 +18,23 @@ public class GymAdapter extends RecyclerView.Adapter<GymAdapter.GymViewHolder> {
     private Context context;
     private List<Gym> gymList;
     private OnItemClickListener listener; // Interface để xử lý sự kiện click
+    private OnItemLongClickListener longClickListener; // Interface cho long click
+    private OnDeleteClickListener deleteListener; // Listener mới cho nút xóa
+    private boolean isAdminContext; // Biến để kiểm tra ngữ cảnh admin
 
     // Interface để Activity có thể lắng nghe sự kiện click trên item
     public interface OnItemClickListener {
         void onItemClick(Gym gym); // Truyền đối tượng Gym được click
+    }
+
+    // Interface cho long click
+    public interface OnItemLongClickListener {
+        void onItemLongClick(Gym gym);
+    }
+
+    // Interface mới cho sự kiện click nút xóa
+    public interface OnDeleteClickListener {
+        void onDeleteClick(Gym gym);
     }
 
     // Phương thức để Activity đăng ký lắng nghe
@@ -29,10 +42,20 @@ public class GymAdapter extends RecyclerView.Adapter<GymAdapter.GymViewHolder> {
         this.listener = listener;
     }
 
-    // Constructor của Adapter
-    public GymAdapter(Context context, List<Gym> gymList) {
+    public void setOnItemLongClickListener(OnItemLongClickListener listener) {
+        this.longClickListener = listener;
+    }
+
+    // Phương thức để Activity đăng ký lắng nghe sự kiện xóa
+    public void setOnDeleteClickListener(OnDeleteClickListener listener) {
+        this.deleteListener = listener;
+    }
+
+    // Constructor của Adapter - Thêm tham số isAdminContext
+    public GymAdapter(Context context, List<Gym> gymList, boolean isAdminContext) {
         this.context = context;
         this.gymList = gymList;
+        this.isAdminContext = isAdminContext; // Lưu trạng thái admin
     }
 
 
@@ -75,17 +98,52 @@ public class GymAdapter extends RecyclerView.Adapter<GymAdapter.GymViewHolder> {
             holder.imageViewGym.setImageResource(R.mipmap.ic_launcher);
         }
 
-        // Gán sự kiện click cho toàn bộ itemView của ViewHolder
+        // Ẩn/hiện nút xóa tùy thuộc vào ngữ cảnh admin
+        if (isAdminContext) {
+            holder.imageViewDeleteGym.setVisibility(View.VISIBLE);
+            // Gán sự kiện click cho nút xóa chỉ khi hiển thị
+            holder.imageViewDeleteGym.setOnClickListener(v -> {
+                if (deleteListener != null) {
+                    int currentPosition = holder.getAdapterPosition();
+                    if (currentPosition != RecyclerView.NO_POSITION) {
+                        deleteListener.onDeleteClick(gymList.get(currentPosition));
+                    }
+                }
+            });
+        } else {
+            holder.imageViewDeleteGym.setVisibility(View.GONE);
+            // Bỏ listener nếu nút ẩn
+            holder.imageViewDeleteGym.setOnClickListener(null);
+        }
+
+        // Gán sự kiện click cho toàn bộ itemView của ViewHolder (cho chỉnh sửa)
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Chỉ xử lý click item nếu không phải là ngữ cảnh admin hoặc nếu là admin nhưng không click vào nút xóa
+                // (Việc click vào nút xóa đã được xử lý ở trên)
                 if (listener != null) {
-                    // Lấy đúng vị trí của item được click
+                     // Đảm bảo không xung đột với click nút xóa nếu cùng vị trí
                     int currentPosition = holder.getAdapterPosition();
-                    if (currentPosition != RecyclerView.NO_POSITION) { // Đảm bảo vị trí hợp lệ
+                     if (currentPosition != RecyclerView.NO_POSITION) {
                         listener.onItemClick(gymList.get(currentPosition));
+                     }
+                }
+            }
+        });
+
+        // Gán sự kiện long click cho itemView (có thể bỏ nếu không dùng long click cho chức năng khác)
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (longClickListener != null) {
+                    int currentPosition = holder.getAdapterPosition();
+                    if (currentPosition != RecyclerView.NO_POSITION) {
+                        longClickListener.onItemLongClick(gymList.get(currentPosition));
+                        return true; // Trả về true để tiêu thụ sự kiện long click
                     }
                 }
+                return false; // Trả về false nếu không xử lý long click
             }
         });
     }
@@ -103,6 +161,7 @@ public class GymAdapter extends RecyclerView.Adapter<GymAdapter.GymViewHolder> {
         TextView textViewGymName;
         TextView textViewGymAddress;
         TextView textViewGymPhone;
+        ImageView imageViewDeleteGym; // Ánh xạ ImageView xóa
 
         public GymViewHolder(@NonNull View itemView) {
             super(itemView); // itemView là view của list_item_gym.xml đã được inflate
@@ -112,6 +171,7 @@ public class GymAdapter extends RecyclerView.Adapter<GymAdapter.GymViewHolder> {
             textViewGymName = itemView.findViewById(R.id.textViewGymName);
             textViewGymAddress = itemView.findViewById(R.id.textViewGymAddress);
             textViewGymPhone = itemView.findViewById(R.id.textViewGymPhone);
+            imageViewDeleteGym = itemView.findViewById(R.id.imageViewDeleteGym); // Ánh xạ ImageView xóa
         }
     }
 

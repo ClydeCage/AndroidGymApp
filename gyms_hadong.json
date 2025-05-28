@@ -1,0 +1,35 @@
+[
+  {
+    "name": "California Fitness & Yoga Center Hà Đông",
+    "address": "Tầng 4, TTTM Vincom Mega Mall Royal City, 72A Nguyễn Trãi, Quận Hà Đông, Hà Nội",
+    "phone": "1800 6995",
+    "description": "Trung tâm thể hình và yoga hàng đầu với trang thiết bị hiện đại.",
+    "imageUrl": "https://example.com/images/california_hadong.jpg",
+    "latitude": 20.9978,
+    "longitude": 105.8039,
+    "services": ["Yoga", "Zumba", "Spinning", "Huấn luyện viên cá nhân", "Group X"],
+    "amenities": ["Phòng xông hơi", "Bể bơi", "Quán bar dinh dưỡng", "Chỗ đậu xe"]
+  },
+  {
+    "name": "Elite Fitness Hà Đông",
+    "address": "Tầng 5, TTTM Hồ Gươm Plaza, 110 Trần Phú, Quận Hà Đông, Hà Nội",
+    "phone": "024 7307 9666",
+    "description": "Phòng tập cao cấp với nhiều tiện ích và chương trình tập luyện đa dạng.",
+    "imageUrl": "https://example.com/images/elite_hadong.jpg",
+    "latitude": 20.9765,
+    "longitude": 105.7888,
+    "services": ["Group X", "Kickboxing", "Pilates", "Huấn luyện viên cá nhân"],
+    "amenities": ["Bể bơi 4 mùa", "Khu vực thư giãn", "Phòng xông hơi", "Cafe"]
+  },
+  {
+    "name": "Sweat Fitness Studios Hà Đông",
+    "address": "Tầng 3, TTTM Aeon Mall Hà Đông, Đường Ngô Thì Nhậm kéo dài, Quận Hà Đông, Hà Nội",
+    "phone": "0987 654 321",
+    "description": "Phòng tập hiện đại tập trung vào các lớp nhóm cường độ cao.",
+    "imageUrl": "https://example.com/images/sweat_hadong.jpg",
+    "latitude": 20.9701,
+    "longitude": 105.7516,
+    "services": ["HIIT", "Boxing", "Yoga Flow", "Strength Training"],
+    "amenities": ["Phòng thay đồ tiện nghi", "Nước uống miễn phí"]
+  }
+] 

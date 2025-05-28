@@ -53,6 +53,24 @@
         <activity
             android:name=".WorkoutScheduleDetailActivity"
             android:exported="false" />
+        <activity
+            android:name=".AdminGymActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EditGymActivity"
+            android:exported="false" />
+        <activity android:name=".SelectItemsActivity"
+            android:exported="false" />
+        <activity android:name=".AdminServicesActivity"
+            android:exported="false" />
+        <activity android:name=".EditServiceActivity"
+            android:exported="false"/>
+        <activity android:name=".AdminOptionsActivity"
+            android:exported="false"/>
+        <activity android:name=".AdminAmenitiesActivity" android:label="Quản lý Tiện ích" android:exported="false"></activity>
+        <activity android:name=".EditAmenityActivity" android:label="Thêm/Sửa Tiện ích" android:exported="false"></activity>
+        <activity android:name=".AdminTrainersActivity" android:label="Quản lý Huấn luyện viên" android:exported="false"></activity>
+        <activity android:name=".EditTrainerActivity" android:label="Thêm/Sửa Huấn luyện viên" android:exported="false"></activity>
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAZ12Y8Fb0HItupN6k5WTrx9mVFNTWvgbc"/> <!-- Thay YOUR_API_KEY bằng API Key của bạn -->

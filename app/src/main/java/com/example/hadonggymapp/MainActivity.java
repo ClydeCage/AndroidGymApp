@@ -25,6 +25,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query; // THÊM IMPORT NÀY NẾU CHƯA CÓ
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.OnFailureListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseUser currentUser;
 
     private String currentSearchQuery = "";
+    private boolean isAdmin = false;
+    private Menu mainMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
 
         gymList = new ArrayList<>();
         originalGymList = new ArrayList<>();
-        gymAdapter = new GymAdapter(this, gymList);
+        gymAdapter = new GymAdapter(this, gymList, false);
         recyclerViewGyms.setAdapter(gymAdapter);
     }
 
@@ -127,6 +131,11 @@ public class MainActivity extends AppCompatActivity {
 
         if (id == R.id.action_user_profile) {
             Intent intent = new Intent(MainActivity.this, UserProfileActivity.class);
+            startActivity(intent);
+            return true;
+        }
+        if (id == R.id.action_admin) {
+            Intent intent = new Intent(MainActivity.this, AdminGymActivity.class);
             startActivity(intent);
             return true;
         }
@@ -207,6 +216,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_activity_menu, menu);
+        mainMenu = menu;
         MenuItem searchItem = menu.findItem(R.id.action_search_gym);
         SearchView searchView = (SearchView) searchItem.getActionView();
 
@@ -219,21 +229,18 @@ public class MainActivity extends AppCompatActivity {
         if (currentSearchQuery != null && !currentSearchQuery.isEmpty()) {
             searchItem.expandActionView();
             searchView.setQuery(currentSearchQuery, false);
-            // searchView.clearFocus(); // Có thể không cần clearFocus ở đây, để người dùng có thể sửa tiếp
         }
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 searchView.clearFocus();
-                // currentSearchQuery = query.trim(); // Đã cập nhật trong onQueryTextChange
-                // filterGymList(currentSearchQuery);
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                currentSearchQuery = newText.trim(); // Cập nhật query khi text thay đổi
+                currentSearchQuery = newText.trim();
                 filterGymList(currentSearchQuery);
                 return true;
             }
@@ -248,12 +255,43 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 currentSearchQuery = "";
-                // Khi đóng search view, filter với query rỗng sẽ hiển thị lại original list
                 filterGymList("");
                 return true;
             }
         });
+
+        // Ẩn menu admin mặc định, chỉ hiển thị nếu là admin
+        MenuItem adminItem = menu.findItem(R.id.action_admin);
+        if (adminItem != null) {
+            adminItem.setVisible(isAdmin);
+        }
+        checkAdminPermission();
         return super.onCreateOptionsMenu(menu);
+    }
+
+    private void checkAdminPermission() {
+        if (currentUser == null) return;
+        db.collection("users").document(currentUser.getUid())
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<com.google.firebase.firestore.DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(com.google.firebase.firestore.DocumentSnapshot documentSnapshot) {
+                        Boolean admin = documentSnapshot.getBoolean("isAdmin");
+                        isAdmin = (admin != null && admin);
+                        if (mainMenu != null) {
+                            MenuItem adminItem = mainMenu.findItem(R.id.action_admin);
+                            if (adminItem != null) {
+                                adminItem.setVisible(isAdmin);
+                            }
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "Lỗi kiểm tra quyền admin", e);
+                    }
+                });
     }
 
     private void filterGymList(String searchText) {
