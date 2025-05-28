@@ -2,7 +2,11 @@ package com.example.hadonggymapp;
 
 import java.util.Date;
 
-public class WorkoutSchedule {
+import com.google.firebase.firestore.PropertyName;
+
+import java.io.Serializable;
+
+public class WorkoutSchedule implements Serializable {
     private String id;
     private String userId;
     private String gymId;
@@ -13,6 +17,9 @@ public class WorkoutSchedule {
     private String notes;
     private int rating;
     private String review;
+
+    private String gymName;
+    private String trainerName;
 
     // Empty constructor for Firestore
     public WorkoutSchedule() {}
@@ -41,11 +48,15 @@ public class WorkoutSchedule {
     public String getTrainerId() { return trainerId; }
     public void setTrainerId(String trainerId) { this.trainerId = trainerId; }
 
-    public Date getWorkoutDate() { return workoutDate; }
-    public void setWorkoutDate(Date workoutDate) { this.workoutDate = workoutDate; }
+    @PropertyName("workoutDate")
+    public Date getDate() { return workoutDate; }
+    @PropertyName("workoutDate")
+    public void setDate(Date workoutDate) { this.workoutDate = workoutDate; }
 
-    public String getWorkoutTime() { return workoutTime; }
-    public void setWorkoutTime(String workoutTime) { this.workoutTime = workoutTime; }
+    @PropertyName("workoutTime")
+    public String getTime() { return workoutTime; }
+    @PropertyName("workoutTime")
+    public void setTime(String workoutTime) { this.workoutTime = workoutTime; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
@@ -58,4 +69,10 @@ public class WorkoutSchedule {
 
     public String getReview() { return review; }
     public void setReview(String review) { this.review = review; }
+
+    public String getGymName() { return gymName; }
+    public void setGymName(String gymName) { this.gymName = gymName; }
+
+    public String getTrainerName() { return trainerName; }
+    public void setTrainerName(String trainerName) { this.trainerName = trainerName; }
 } 

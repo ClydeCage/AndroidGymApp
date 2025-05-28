@@ -165,6 +165,22 @@ public class ScheduleWorkoutActivity extends AppCompatActivity {
         );
         schedule.setNotes(editTextNotes.getText().toString());
 
+        // Set gym and trainer names before saving
+        if (selectedGym != null) {
+            schedule.setGymName(selectedGym.getName());
+        }
+        // Find the selected trainer by ID to get their name
+        Trainer selectedTrainer = null;
+        for (Trainer trainer : trainerList) {
+            if (trainer.getId().equals(selectedTrainerId)) {
+                selectedTrainer = trainer;
+                break;
+            }
+        }
+        if (selectedTrainer != null) {
+            schedule.setTrainerName(selectedTrainer.getName());
+        }
+
         db.collection("workout_schedules")
             .document(schedule.getId())
             .set(schedule)
