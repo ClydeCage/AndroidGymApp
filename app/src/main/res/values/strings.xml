@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">HaDongGymApp</string>
+    <string name="app_name">HaDongGym</string>
     <!-- MainActivity -->
     <string name="main_activity_title">Phòng Gym Hà Đông</string>
     <string name="toast_gym_selected">Bạn đã chọn: %1$s</string> <!-- %1$s là placeholder cho tên -->
