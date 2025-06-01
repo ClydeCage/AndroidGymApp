@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_favorites"
+        android:icon="@drawable/ic_favorite"
+        android:title="Phòng tập yêu thích"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_user_profile"
+        android:icon="@drawable/ic_person"
+        android:title="Tài khoản"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_admin"
+        android:title="Quản lý"
+        app:showAsAction="never" />
+</menu> 

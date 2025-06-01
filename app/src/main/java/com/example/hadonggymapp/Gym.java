@@ -16,6 +16,10 @@ public class Gym implements Serializable {
     private Double latitude;
     private Double longitude;
     private String id;
+    private List<Trainer> trainers;
+    private boolean isFavorite; // Thêm trường isFavorite
+    private float averageRating;
+    private int reviewCount;
 
     // Constructor rỗng - RẤT QUAN TRỌNG cho Firebase Firestore
     public Gym() {
@@ -34,6 +38,7 @@ public class Gym implements Serializable {
         this.imageUrls = imageUrls;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.isFavorite = false; // Mặc định là false
     }
 
     // Getters
@@ -85,6 +90,22 @@ public class Gym implements Serializable {
         return id;
     }
 
+    public List<Trainer> getTrainers() {
+        return trainers;
+    }
+
+    public boolean isFavorite() {
+        return isFavorite;
+    }
+
+    public float getAverageRating() {
+        return averageRating;
+    }
+
+    public int getReviewCount() {
+        return reviewCount;
+    }
+
     // Setters - Firebase cũng cần setters để gán giá trị
     public void setName(String name) {
         this.name = name;
@@ -132,5 +153,21 @@ public class Gym implements Serializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public void setTrainers(List<Trainer> trainers) {
+        this.trainers = trainers;
+    }
+
+    public void setFavorite(boolean favorite) {
+        isFavorite = favorite;
+    }
+
+    public void setAverageRating(float averageRating) {
+        this.averageRating = averageRating;
+    }
+
+    public void setReviewCount(int reviewCount) {
+        this.reviewCount = reviewCount;
     }
 }

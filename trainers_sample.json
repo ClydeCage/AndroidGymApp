@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Nguyễn Văn A",
+    "phone": "0912345678",
+    "specialization": "PT giảm cân, tăng cơ",
+    "description": "Chuyên gia thể hình với 5 năm kinh nghiệm.",
+    "imageUrl": "https://randomuser.me/api/portraits/men/1.jpg",
+    "rating": 4.8,
+    "totalRatings": 25,
+    "gymName": "California Fitness & Yoga Center Hà Đông"
+  },
+  {
+    "name": "Trần Thị B",
+    "phone": "0987654321",
+    "specialization": "Yoga, Pilates",
+    "description": "HLV Yoga quốc tế, tận tâm với học viên.",
+    "imageUrl": "https://randomuser.me/api/portraits/women/2.jpg",
+    "rating": 4.9,
+    "totalRatings": 30,
+    "gymName": "California Fitness & Yoga Center Hà Đông"
+  },
+  {
+    "name": "Phạm Minh C",
+    "phone": "0901234567",
+    "specialization": "Kickboxing, Group X",
+    "description": "HLV Kickboxing, truyền cảm hứng cho học viên.",
+    "imageUrl": "https://randomuser.me/api/portraits/men/3.jpg",
+    "rating": 4.7,
+    "totalRatings": 18,
+    "gymName": "Elite Fitness Hà Đông"
+  },
+  {
+    "name": "Lê Thị D",
+    "phone": "0978123456",
+    "specialization": "Pilates, PT cá nhân",
+    "description": "Chuyên gia Pilates, hỗ trợ cá nhân hóa bài tập.",
+    "imageUrl": "https://randomuser.me/api/portraits/women/4.jpg",
+    "rating": 4.85,
+    "totalRatings": 22,
+    "gymName": "Elite Fitness Hà Đông"
+  }
+] 

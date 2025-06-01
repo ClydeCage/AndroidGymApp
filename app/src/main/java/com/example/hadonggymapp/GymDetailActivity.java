@@ -15,6 +15,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.view.View;
+import android.app.AlertDialog;
+import android.view.LayoutInflater;
+import android.widget.EditText;
+import android.widget.RatingBar;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.chip.Chip;
@@ -22,6 +26,17 @@ import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.List;
+import java.util.ArrayList;
+
+import com.example.hadonggymapp.FavoriteLocalManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 public class GymDetailActivity extends AppCompatActivity {
 
@@ -40,8 +55,17 @@ public class GymDetailActivity extends AppCompatActivity {
     private ImageView imageViewStaticMap; // Thêm ImageView cho static map
     private Button buttonCall;
     private Button buttonDirection;
+    private RecyclerView recyclerViewReviews;
+    private Button buttonAddReview;
+    private ReviewAdapter reviewAdapter;
+    private List<Review> reviewList = new ArrayList<>();
+    private TextView textViewAverageRating;
+    private RatingBar ratingBarAverage;
 
     private Gym currentGym;
+    private String currentUserId = null;
+    private String currentUserName = null;
+    private Review myReview = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,9 +89,49 @@ public class GymDetailActivity extends AppCompatActivity {
         imageViewStaticMap = findViewById(R.id.imageViewStaticMap); // Ánh xạ ImageView
         buttonCall = findViewById(R.id.buttonCall);
         buttonDirection = findViewById(R.id.buttonDirection);
+        recyclerViewReviews = findViewById(R.id.recyclerViewReviews);
+        buttonAddReview = findViewById(R.id.buttonAddReview);
+        textViewAverageRating = findViewById(R.id.textViewAverageRating);
+        ratingBarAverage = findViewById(R.id.ratingBarAverage);
 
         // Lấy dữ liệu Gym object từ Intent
         currentGym = (Gym) getIntent().getSerializableExtra(EXTRA_GYM_OBJECT);
+
+        // Lấy userId và userName thực tế từ FirebaseAuth
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (firebaseUser != null) {
+            currentUserId = firebaseUser.getUid();
+            // Lấy tên từ profile hoặc Firestore
+            String displayName = firebaseUser.getDisplayName();
+            if (displayName != null && !displayName.isEmpty()) {
+                currentUserName = displayName;
+            } else {
+                // Nếu chưa có displayName, lấy từ Firestore
+                FirebaseFirestore.getInstance().collection("users").document(currentUserId)
+                        .get()
+                        .addOnSuccessListener(documentSnapshot -> {
+                            String name = documentSnapshot.getString("name");
+                            if (name != null && !name.isEmpty()) {
+                                currentUserName = name;
+                            } else if (firebaseUser.getEmail() != null) {
+                                currentUserName = firebaseUser.getEmail();
+                            } else {
+                                currentUserName = "Người dùng";
+                            }
+                        })
+                        .addOnFailureListener(e -> {
+                            if (firebaseUser.getEmail() != null) {
+                                currentUserName = firebaseUser.getEmail();
+                            } else {
+                                currentUserName = "Người dùng";
+                            }
+                        });
+            }
+        } else {
+            // Nếu chưa đăng nhập, không cho đánh giá
+            currentUserId = null;
+            currentUserName = null;
+        }
 
         if (currentGym != null) {
             if (getSupportActionBar() != null) {
@@ -79,6 +143,15 @@ public class GymDetailActivity extends AppCompatActivity {
 
             // Xử lý click vào ảnh map tĩnh để mở chỉ đường
             imageViewStaticMap.setOnClickListener(v -> openGoogleMapsDirection(currentGym));
+
+            recyclerViewReviews.setLayoutManager(new LinearLayoutManager(this));
+            reviewAdapter = new ReviewAdapter(this, reviewList);
+            recyclerViewReviews.setAdapter(reviewAdapter);
+            loadReviews();
+            checkMyReview();
+            buttonAddReview.setOnClickListener(v -> {
+                showReviewDialog();
+            });
 
         } else {
             Toast.makeText(this, getString(R.string.error_loading_gym_details), Toast.LENGTH_SHORT).show();
@@ -289,5 +362,134 @@ public class GymDetailActivity extends AppCompatActivity {
                 imageView = (ImageView) itemView;
             }
         }
+    }
+
+    private void loadReviews() {
+        if (currentGym == null || currentGym.getId() == null) return;
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("gyms")
+            .document(currentGym.getId())
+            .collection("reviews")
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .get()
+            .addOnSuccessListener(queryDocumentSnapshots -> {
+                reviewList.clear();
+                float totalRating = 0;
+                for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                    Review review = doc.toObject(Review.class);
+                    review.setId(doc.getId());
+                    reviewList.add(review);
+                    totalRating += review.getRating();
+                }
+                reviewAdapter.setReviewList(reviewList);
+                // Tính điểm trung bình
+                if (reviewList.size() > 0) {
+                    float avg = totalRating / reviewList.size();
+                    textViewAverageRating.setText(String.format("★ %.1f (%d đánh giá)", avg, reviewList.size()));
+                    // Cập nhật trường trung bình lên Firestore
+                    db.collection("gyms").document(currentGym.getId())
+                        .update("averageRating", avg, "reviewCount", reviewList.size());
+                    currentGym.setAverageRating(avg);
+                    currentGym.setReviewCount(reviewList.size());
+                    if (ratingBarAverage != null) ratingBarAverage.setRating(avg);
+                } else {
+                    textViewAverageRating.setText("Chưa có đánh giá");
+                    db.collection("gyms").document(currentGym.getId())
+                        .update("averageRating", 0, "reviewCount", 0);
+                    currentGym.setAverageRating(0);
+                    currentGym.setReviewCount(0);
+                    if (ratingBarAverage != null) ratingBarAverage.setRating(0);
+                }
+            });
+    }
+
+    private void checkMyReview() {
+        if (currentGym == null || currentGym.getId() == null) return;
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("gyms")
+            .document(currentGym.getId())
+            .collection("reviews")
+            .whereEqualTo("userId", currentUserId)
+            .get()
+            .addOnSuccessListener(queryDocumentSnapshots -> {
+                if (!queryDocumentSnapshots.isEmpty()) {
+                    myReview = queryDocumentSnapshots.getDocuments().get(0).toObject(Review.class);
+                    myReview.setId(queryDocumentSnapshots.getDocuments().get(0).getId());
+                    buttonAddReview.setText("Sửa/Xóa đánh giá của bạn");
+                } else {
+                    myReview = null;
+                    buttonAddReview.setText("Đánh giá phòng gym này");
+                }
+            });
+    }
+
+    private void showReviewDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_review, null);
+        RatingBar ratingBar = dialogView.findViewById(R.id.ratingBarInput);
+        EditText editTextComment = dialogView.findViewById(R.id.editTextComment);
+        Button buttonDelete = new Button(this);
+        buttonDelete.setText("Xóa đánh giá");
+        if (myReview != null) {
+            ratingBar.setRating(myReview.getRating());
+            editTextComment.setText(myReview.getComment());
+            // Thêm nút xóa nếu đã có review
+            ((LinearLayout) dialogView).addView(buttonDelete);
+        }
+        builder.setView(dialogView);
+        AlertDialog dialog = builder.create();
+        dialogView.findViewById(R.id.buttonCancel).setOnClickListener(v -> dialog.dismiss());
+        dialogView.findViewById(R.id.buttonSave).setOnClickListener(v -> {
+            float rating = ratingBar.getRating();
+            String comment = editTextComment.getText().toString().trim();
+            if (rating == 0) {
+                Toast.makeText(this, "Vui lòng chọn số sao!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            saveOrUpdateReview(rating, comment);
+            dialog.dismiss();
+        });
+        buttonDelete.setOnClickListener(v -> {
+            deleteMyReview();
+            dialog.dismiss();
+        });
+        dialog.show();
+    }
+
+    private void saveOrUpdateReview(float rating, String comment) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        String gymId = currentGym.getId();
+        long now = System.currentTimeMillis();
+        if (myReview == null) {
+            // Thêm mới
+            Review review = new Review(null, currentUserId, currentUserName, gymId, rating, comment, now);
+            db.collection("gyms").document(gymId).collection("reviews").add(review)
+                .addOnSuccessListener(documentReference -> {
+                    Toast.makeText(this, "Đã gửi đánh giá!", Toast.LENGTH_SHORT).show();
+                    loadReviews();
+                    checkMyReview();
+                });
+        } else {
+            // Sửa
+            db.collection("gyms").document(gymId).collection("reviews").document(myReview.getId())
+                .set(new Review(myReview.getId(), currentUserId, currentUserName, gymId, rating, comment, now))
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "Đã cập nhật đánh giá!", Toast.LENGTH_SHORT).show();
+                    loadReviews();
+                    checkMyReview();
+                });
+        }
+    }
+
+    private void deleteMyReview() {
+        if (myReview == null) return;
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("gyms").document(currentGym.getId()).collection("reviews").document(myReview.getId())
+            .delete()
+            .addOnSuccessListener(aVoid -> {
+                Toast.makeText(this, "Đã xóa đánh giá!", Toast.LENGTH_SHORT).show();
+                loadReviews();
+                checkMyReview();
+            });
     }
 }

@@ -106,6 +106,15 @@ public class AdminGymActivity extends AppCompatActivity implements GymAdapter.On
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         Gym gym = document.toObject(Gym.class);
                         gym.setId(document.getId());
+                        // Lấy thủ công averageRating và reviewCount nếu có
+                        if (document.contains("averageRating")) {
+                            Double avg = document.getDouble("averageRating");
+                            gym.setAverageRating(avg != null ? avg.floatValue() : 0f);
+                        }
+                        if (document.contains("reviewCount")) {
+                            Long count = document.getLong("reviewCount");
+                            gym.setReviewCount(count != null ? count.intValue() : 0);
+                        }
                         gymList.add(gym);
                     }
                     gymAdapter.notifyDataSetChanged();

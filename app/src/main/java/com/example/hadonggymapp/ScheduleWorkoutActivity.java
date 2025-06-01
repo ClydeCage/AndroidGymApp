@@ -20,6 +20,10 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.List;
 import java.util.ArrayList;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 public class ScheduleWorkoutActivity extends AppCompatActivity {
     private TextInputEditText editTextGymName, editTextTrainer, editTextDate, editTextTime, editTextNotes;
@@ -31,6 +35,23 @@ public class ScheduleWorkoutActivity extends AppCompatActivity {
     private Gym selectedGym;
     private String selectedTrainerId;
     private List<Trainer> trainerList = new ArrayList<>();
+    private static final List<Trainer> SAMPLE_TRAINERS = new ArrayList<>();
+
+    // Xóa hoặc comment khối static này nếu không dùng SAMPLE_TRAINERS nữa
+    /*
+    static {
+        SAMPLE_TRAINERS.add(new Trainer("Nguyễn Văn A"));
+        SAMPLE_TRAINERS.get(0).setSpecialization("PT giảm cân, tăng cơ");
+        SAMPLE_TRAINERS.get(0).setDescription("Chuyên gia thể hình với 5 năm kinh nghiệm.");
+        SAMPLE_TRAINERS.get(0).setPhone("0912345678");
+        SAMPLE_TRAINERS.get(0).setImageUrl("https://randomuser.me/api/portraits/men/1.jpg");
+        SAMPLE_TRAINERS.add(new Trainer("Trần Thị B"));
+        SAMPLE_TRAINERS.get(1).setSpecialization("Yoga, Pilates");
+        SAMPLE_TRAINERS.get(1).setDescription("HLV Yoga quốc tế, tận tâm với học viên.");
+        SAMPLE_TRAINERS.get(1).setPhone("0987654321");
+        SAMPLE_TRAINERS.get(1).setImageUrl("https://randomuser.me/api/portraits/women/2.jpg");
+    }
+    */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +70,7 @@ public class ScheduleWorkoutActivity extends AppCompatActivity {
             selectedGym = (Gym) getIntent().getSerializableExtra("gym");
             if (selectedGym != null) {
                 editTextGymName.setText(selectedGym.getName());
-                loadTrainersForGym(selectedGym.getId());
+                loadTrainersForGym(selectedGym);
             }
         }
 
@@ -106,29 +127,25 @@ public class ScheduleWorkoutActivity extends AppCompatActivity {
         timePickerDialog.show();
     }
 
-    private void loadTrainersForGym(String gymId) {
-        android.util.Log.d("DEBUG", "Loading trainers for gymId: " + gymId);
-        db.collection("trainers")
-            .whereEqualTo("gymId", gymId)
-            .get()
-            .addOnSuccessListener(queryDocumentSnapshots -> {
-                trainerList.clear();
-                for (com.google.firebase.firestore.DocumentSnapshot doc : queryDocumentSnapshots) {
-                    Trainer trainer = doc.toObject(Trainer.class);
-                    if (trainer != null) {
-                        android.util.Log.d("DEBUG", "Trainer loaded: " + trainer.getName());
-                        if (trainer.getId() == null || trainer.getId().isEmpty()) {
-                            trainer.setId(doc.getId());
-                        }
-                        trainerList.add(trainer);
+    private void loadTrainersForGym(Gym gym) {
+        trainerList.clear();
+        if (gym != null && gym.getServices() != null) {
+            android.util.Log.d("DEBUG", "Gym services: " + gym.getServices().toString());
+            for (String service : gym.getServices()) {
+                android.util.Log.d("DEBUG", "Service: [" + service + "]");
+                if (service != null && service.trim().equalsIgnoreCase("Huấn luyện viên cá nhân")) {
+                    // Nếu có dịch vụ PT, lấy danh sách trainer từ gym
+                    if (gym.getTrainers() != null) {
+                         trainerList.addAll(gym.getTrainers());
+                    } else {
+                        android.util.Log.d("DEBUG", "Gym has PT service but no trainers listed.");
                     }
+                    break;
                 }
-                android.util.Log.d("DEBUG", "Total trainers loaded: " + trainerList.size());
-            })
-            .addOnFailureListener(e -> {
-                android.util.Log.e("DEBUG", "Error loading trainers: " + e.getMessage());
-                Toast.makeText(this, "Không tải được danh sách huấn luyện viên", Toast.LENGTH_SHORT).show();
-            });
+            }
+        } else {
+             android.util.Log.d("DEBUG", "Gym or services list is null.");
+        }
     }
 
     private void showTrainerSelection() {
@@ -145,7 +162,7 @@ public class ScheduleWorkoutActivity extends AppCompatActivity {
             .setItems(trainerNames, (dialog, which) -> {
                 Trainer selected = trainerList.get(which);
                 editTextTrainer.setText(selected.getName());
-                selectedTrainerId = selected.getId();
+                selectedTrainerId = selected.getName();
             })
             .show();
     }
@@ -174,7 +191,7 @@ public class ScheduleWorkoutActivity extends AppCompatActivity {
         // Find the selected trainer by ID to get their name
         Trainer selectedTrainer = null;
         for (Trainer trainer : trainerList) {
-            if (trainer.getId().equals(selectedTrainerId)) {
+            if (trainer.getName().equals(selectedTrainerId)) {
                 selectedTrainer = trainer;
                 break;
             }
@@ -198,6 +215,10 @@ public class ScheduleWorkoutActivity extends AppCompatActivity {
     private boolean validateInputs() {
         if (selectedGym == null) {
             Toast.makeText(this, "Vui lòng chọn phòng tập", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (trainerList.isEmpty()) {
+            Toast.makeText(this, "Phòng tập này chưa có huấn luyện viên.", Toast.LENGTH_SHORT).show();
             return false;
         }
         if (selectedTrainerId == null) {

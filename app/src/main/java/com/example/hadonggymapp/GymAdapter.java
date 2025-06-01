@@ -5,7 +5,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,6 +24,7 @@ public class GymAdapter extends RecyclerView.Adapter<GymAdapter.GymViewHolder> {
     private OnItemLongClickListener longClickListener; // Interface cho long click
     private OnDeleteClickListener deleteListener; // Listener mới cho nút xóa
     private boolean isAdminContext; // Biến để kiểm tra ngữ cảnh admin
+    private FavoriteGymManager favoriteGymManager;
 
     // Interface để Activity có thể lắng nghe sự kiện click trên item
     public interface OnItemClickListener {
@@ -56,9 +60,8 @@ public class GymAdapter extends RecyclerView.Adapter<GymAdapter.GymViewHolder> {
         this.context = context;
         this.gymList = gymList;
         this.isAdminContext = isAdminContext; // Lưu trạng thái admin
+        this.favoriteGymManager = new FavoriteGymManager();
     }
-
-
 
     // Phương thức này được gọi khi RecyclerView cần tạo một ViewHolder mới.
     // Nó "inflate" (thổi phồng/tạo) layout item (list_item_gym.xml) và trả về một ViewHolder mới.
@@ -75,33 +78,74 @@ public class GymAdapter extends RecyclerView.Adapter<GymAdapter.GymViewHolder> {
     public void onBindViewHolder(@NonNull GymViewHolder holder, int position) {
         Gym currentGym = gymList.get(position);
 
-        holder.textViewGymName.setText(currentGym.getName());
-        holder.textViewGymAddress.setText(currentGym.getAddress());
-
-        if (currentGym.getPhone() != null && !currentGym.getPhone().isEmpty()) {
-            holder.textViewGymPhone.setText(currentGym.getPhone());
-            holder.textViewGymPhone.setVisibility(View.VISIBLE);
-        } else {
-            holder.textViewGymPhone.setVisibility(View.GONE);
-        }
-
-        // SỬ DỤNG GLIDE ĐỂ TẢI ẢNH TỪ URL
+        // Load image using Glide
         if (currentGym.getImageUrl() != null && !currentGym.getImageUrl().isEmpty()) {
-            Glide.with(context) // 'context' là Context của Activity hoặc Application
-                    .load(currentGym.getImageUrl()) // URL của ảnh
-                    .placeholder(R.mipmap.ic_launcher) // Ảnh hiển thị trong khi tải (tùy chọn)
-                    .error(R.mipmap.ic_launcher) // Ảnh hiển thị nếu có lỗi tải (tùy chọn, tạo 1 ảnh drawable tên ic_error_placeholder)
-                    .centerCrop() // Hoặc .fitCenter() tùy theo bạn muốn ảnh hiển thị thế nào
-                    .into(holder.imageViewGym); // ImageView để hiển thị ảnh
-        } else {
-            // Nếu không có imageUrl, hiển thị ảnh mặc định
+            Glide.with(context)
+                    .load(currentGym.getImageUrl())
+                    .placeholder(R.mipmap.ic_launcher)
+                    .error(R.mipmap.ic_launcher)
+                    .centerCrop()
+                    .into(holder.imageViewGym);
+        } else if (currentGym.getImageUrls() != null && !currentGym.getImageUrls().isEmpty()) {
+             // If multiple images available, use the first one for the list item
+             Glide.with(context)
+                    .load(currentGym.getImageUrls().get(0))
+                    .placeholder(R.mipmap.ic_launcher)
+                    .error(R.mipmap.ic_launcher)
+                    .centerCrop()
+                    .into(holder.imageViewGym);
+        }
+        else {
+            // If no image URL, display default image
             holder.imageViewGym.setImageResource(R.mipmap.ic_launcher);
         }
 
-        // Ẩn/hiện nút xóa tùy thuộc vào ngữ cảnh admin
+        // Display Gym Name and Address
+        holder.textViewGymName.setText(currentGym.getName());
+        holder.textViewGymAddress.setText(currentGym.getAddress() != null ? currentGym.getAddress() : "Đang cập nhật địa chỉ");
+
+        // Display Gym Hours (if available)
+        if (currentGym.getHours() != null && !currentGym.getHours().isEmpty()) {
+            holder.textViewGymHours.setText("Giờ mở cửa: " + currentGym.getHours());
+            holder.containerGymHours.setVisibility(View.VISIBLE); // Show the container if hours available
+        } else {
+            holder.containerGymHours.setVisibility(View.GONE); // Hide the container if no hours
+        }
+
+        // Set favorite icon state (dùng local)
+        boolean isFavorite = FavoriteLocalManager.getFavorites(context).contains(currentGym.getId());
+        holder.imageViewFavorite.setImageResource(
+            isFavorite ? R.drawable.ic_favorite : R.drawable.ic_favorite_border
+        );
+
+        // Set favorite button click listener (dùng local)
+        holder.imageViewFavorite.setOnClickListener(v -> {
+            if (context == null) {
+                android.util.Log.e("FAV_DEBUG", "Context is null, cannot toggle favorite");
+                return;
+            }
+            String gymId = currentGym.getId();
+            if (gymId == null || gymId.isEmpty()) {
+                android.util.Log.e("FAV_DEBUG", "GymId is null or empty, cannot toggle favorite");
+                Toast.makeText(context, "Không thể thao tác yêu thích với phòng gym này!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            boolean currentlyFavorite = FavoriteLocalManager.getFavorites(context).contains(gymId);
+            if (currentlyFavorite) {
+                FavoriteLocalManager.removeFavorite(context, gymId);
+                holder.imageViewFavorite.setImageResource(R.drawable.ic_favorite_border);
+                Toast.makeText(context, "Đã xóa khỏi danh sách yêu thích", Toast.LENGTH_SHORT).show();
+            } else {
+                FavoriteLocalManager.addFavorite(context, gymId);
+                holder.imageViewFavorite.setImageResource(R.drawable.ic_favorite);
+                Toast.makeText(context, "Đã thêm vào danh sách yêu thích", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Hide/show delete button based on admin context
         if (isAdminContext) {
             holder.imageViewDeleteGym.setVisibility(View.VISIBLE);
-            // Gán sự kiện click cho nút xóa chỉ khi hiển thị
+            // Attach click listener for delete button
             holder.imageViewDeleteGym.setOnClickListener(v -> {
                 if (deleteListener != null) {
                     int currentPosition = holder.getAdapterPosition();
@@ -112,18 +156,16 @@ public class GymAdapter extends RecyclerView.Adapter<GymAdapter.GymViewHolder> {
             });
         } else {
             holder.imageViewDeleteGym.setVisibility(View.GONE);
-            // Bỏ listener nếu nút ẩn
+            // Remove listener if button is hidden
             holder.imageViewDeleteGym.setOnClickListener(null);
         }
 
-        // Gán sự kiện click cho toàn bộ itemView của ViewHolder (cho chỉnh sửa)
+        // Attach click listener to the whole item view (for details)
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Chỉ xử lý click item nếu không phải là ngữ cảnh admin hoặc nếu là admin nhưng không click vào nút xóa
-                // (Việc click vào nút xóa đã được xử lý ở trên)
                 if (listener != null) {
-                     // Đảm bảo không xung đột với click nút xóa nếu cùng vị trí
+                     // Ensure position is valid
                     int currentPosition = holder.getAdapterPosition();
                      if (currentPosition != RecyclerView.NO_POSITION) {
                         listener.onItemClick(gymList.get(currentPosition));
@@ -132,7 +174,7 @@ public class GymAdapter extends RecyclerView.Adapter<GymAdapter.GymViewHolder> {
             }
         });
 
-        // Gán sự kiện long click cho itemView (có thể bỏ nếu không dùng long click cho chức năng khác)
+        // Attach long click listener to the whole item view (optional)
         holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -140,12 +182,24 @@ public class GymAdapter extends RecyclerView.Adapter<GymAdapter.GymViewHolder> {
                     int currentPosition = holder.getAdapterPosition();
                     if (currentPosition != RecyclerView.NO_POSITION) {
                         longClickListener.onItemLongClick(gymList.get(currentPosition));
-                        return true; // Trả về true để tiêu thụ sự kiện long click
+                        return true; // Consume the long click event
                     }
                 }
-                return false; // Trả về false nếu không xử lý long click
+                return false; // Do not consume long click
             }
         });
+
+        // Hiển thị số sao trung bình nếu có
+        if (holder.ratingBarItemAverage != null) {
+            float avg = currentGym.getAverageRating();
+            holder.ratingBarItemAverage.setRating(avg);
+            // Thêm text hiển thị số sao và số lượng đánh giá
+            if (avg > 0) {
+                holder.textViewGymHours.setText(String.format("★ %.1f (%d đánh giá)", avg, currentGym.getReviewCount()));
+            } else {
+                holder.textViewGymHours.setText("Chưa có đánh giá");
+            }
+        }
     }
 
     // Trả về tổng số item trong danh sách
@@ -160,18 +214,22 @@ public class GymAdapter extends RecyclerView.Adapter<GymAdapter.GymViewHolder> {
         ImageView imageViewGym;
         TextView textViewGymName;
         TextView textViewGymAddress;
-        TextView textViewGymPhone;
-        ImageView imageViewDeleteGym; // Ánh xạ ImageView xóa
+        TextView textViewGymHours; // Added TextView for hours
+        ImageView imageViewDeleteGym;
+        ImageView imageViewFavorite;
+        LinearLayout containerGymHours; // Added LinearLayout for hours container
+        RatingBar ratingBarItemAverage;
 
         public GymViewHolder(@NonNull View itemView) {
-            super(itemView); // itemView là view của list_item_gym.xml đã được inflate
-
-            // Ánh xạ các View từ layout item vào các biến Java
+            super(itemView);
             imageViewGym = itemView.findViewById(R.id.imageViewGym);
             textViewGymName = itemView.findViewById(R.id.textViewGymName);
             textViewGymAddress = itemView.findViewById(R.id.textViewGymAddress);
-            textViewGymPhone = itemView.findViewById(R.id.textViewGymPhone);
-            imageViewDeleteGym = itemView.findViewById(R.id.imageViewDeleteGym); // Ánh xạ ImageView xóa
+            textViewGymHours = itemView.findViewById(R.id.textViewGymHours); // Map hours TextView
+            imageViewDeleteGym = itemView.findViewById(R.id.imageViewDeleteGym);
+            imageViewFavorite = itemView.findViewById(R.id.imageViewFavorite);
+            containerGymHours = itemView.findViewById(R.id.containerGymHours); // Map hours container
+            ratingBarItemAverage = itemView.findViewById(R.id.ratingBarItemAverage);
         }
     }
 

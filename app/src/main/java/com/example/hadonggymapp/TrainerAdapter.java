@@ -5,11 +5,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import java.util.List;
 
 public class TrainerAdapter extends RecyclerView.Adapter<TrainerAdapter.TrainerViewHolder> {
@@ -57,6 +59,16 @@ public class TrainerAdapter extends RecyclerView.Adapter<TrainerAdapter.TrainerV
         Trainer currentTrainer = trainerList.get(position);
 
         holder.textViewTrainerName.setText(currentTrainer.getName());
+        holder.textViewSpecialization.setText(currentTrainer.getSpecialization());
+        holder.ratingBarTrainer.setRating(currentTrainer.getRating());
+
+        // Load ảnh trainer nếu có
+        if (currentTrainer.getImageUrl() != null && !currentTrainer.getImageUrl().isEmpty()) {
+            Glide.with(context)
+                .load(currentTrainer.getImageUrl())
+                .centerCrop()
+                .into(holder.imageViewTrainer);
+        }
 
         // Gán sự kiện click cho toàn bộ itemView của ViewHolder (cho chỉnh sửa)
         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -88,12 +100,18 @@ public class TrainerAdapter extends RecyclerView.Adapter<TrainerAdapter.TrainerV
     }
 
     public static class TrainerViewHolder extends RecyclerView.ViewHolder {
+        ImageView imageViewTrainer;
         TextView textViewTrainerName;
+        TextView textViewSpecialization;
+        RatingBar ratingBarTrainer;
         ImageView imageViewDeleteTrainer; // ImageView cho nút xóa
 
         public TrainerViewHolder(@NonNull View itemView) {
             super(itemView);
+            imageViewTrainer = itemView.findViewById(R.id.imageViewTrainer);
             textViewTrainerName = itemView.findViewById(R.id.textViewTrainerName);
+            textViewSpecialization = itemView.findViewById(R.id.textViewSpecialization);
+            ratingBarTrainer = itemView.findViewById(R.id.ratingBarTrainer);
             imageViewDeleteTrainer = itemView.findViewById(R.id.imageViewDeleteTrainer);
         }
     }

@@ -13,41 +13,59 @@
     app:cardElevation="4dp"
     android:clickable="true"
     android:focusable="true"
-    android:foreground="?android:attr/selectableItemBackground"> <!-- Giữ lại hiệu ứng khi chạm -->
+    android:foreground="?android:attr/selectableItemBackground">
 
-    <!-- LinearLayout chứa nội dung item (giống như code cũ của bạn) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="12dp"> <!-- Có thể giảm padding ở đây một chút nếu margin của CardView đã đủ -->
+        android:orientation="vertical">
 
+        <!-- Image (now at the top) -->
         <ImageView
             android:id="@+id/imageViewGym"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
             android:scaleType="centerCrop"
             tools:srcCompat="@tools:sample/avatars" />
 
+        <!-- Content Area -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:orientation="vertical"
-            android:layout_marginStart="12dp"
-            android:layout_marginLeft="12dp">
+            android:padding="12dp">
 
-            <TextView
-                android:id="@+id/textViewGymName"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:text="@string/placeholder_gym_name"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/black"
-                android:maxLines="2"
-                android:ellipsize="end"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
+                <!-- Tên phòng gym -->
+                <TextView
+                    android:id="@+id/textViewGymName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    tools:text="@string/placeholder_gym_name"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:maxLines="2"
+                    android:ellipsize="end"/>
+
+                <!-- Favorite Icon -->
+                <ImageView
+                    android:id="@+id/imageViewFavorite"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="8dp"
+                    android:src="@drawable/ic_favorite_border"
+                    android:contentDescription="Yêu thích"/>
+
+            </LinearLayout>
+
+            <!-- Địa chỉ -->
             <TextView
                 android:id="@+id/textViewGymAddress"
                 android:layout_width="match_parent"
@@ -58,24 +76,46 @@
                 android:maxLines="2"
                 android:ellipsize="end"/>
 
-            <TextView
-                android:id="@+id/textViewGymPhone"
+            <!-- Additional Info (Hours, etc.) -->
+            <LinearLayout
+                android:id="@+id/containerGymHours"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:text="@string/placeholder_gym_phone"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp"
+                android:orientation="vertical"
+                android:layout_marginTop="8dp" >
+
+                <!-- Giờ mở cửa -->
+                <TextView
+                    android:id="@+id/textViewGymHours"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:text="Giờ mở cửa: 6:00 - 22:00"
+                    android:textSize="14sp"
+                    android:ellipsize="end" />
+
+                <!-- Rating Bar -->
+                <RatingBar
+                    android:id="@+id/ratingBarItemAverage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:numStars="5"
+                    android:stepSize="0.1"
+                    android:isIndicator="true"
+                    android:layout_marginTop="4dp"/>
+
+            </LinearLayout>
+
+            <!-- Delete Icon (aligned to the right) -->
+            <ImageView
+                android:id="@+id/imageViewDeleteGym"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="end|top"
+                android:layout_marginTop="-24dp"
+                android:contentDescription="Xóa phòng tập"
+                android:src="@android:drawable/ic_delete"
                 android:visibility="gone" />
+
         </LinearLayout>
-
-        <ImageView
-            android:id="@+id/imageViewDeleteGym"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginStart="8dp"
-            android:contentDescription="Xóa phòng tập"
-            android:src="@android:drawable/ic_delete"
-            android:visibility="gone" />
-
     </LinearLayout>
 </androidx.cardview.widget.CardView>

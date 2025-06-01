@@ -10,6 +10,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,8 +29,20 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.OnFailureListener;
 
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.button.MaterialButton;
+import android.widget.LinearLayout;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import android.view.LayoutInflater;
+
+import com.google.firebase.firestore.DocumentSnapshot;
+import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -51,6 +64,32 @@ public class MainActivity extends AppCompatActivity {
     private String currentSearchQuery = "";
     private boolean isAdmin = false;
     private Menu mainMenu;
+
+    private MaterialButton buttonFilter;
+
+    private BottomSheetDialog filterBottomSheet;
+    private ChipGroup bottomSheetChipGroupServices;
+    private ChipGroup bottomSheetChipGroupAmenities;
+
+    private List<String> selectedServicesFilter = new ArrayList<>();
+    private List<String> selectedAmenitiesFilter = new ArrayList<>();
+
+    // Danh sách dịch vụ và tiện ích chuẩn (Hardcoded tạm thời)
+    private static final List<String> MASTER_SERVICES = Arrays.asList(
+        "Yoga", "Zumba", "Đạp xe trong nhà", "Huấn luyện viên cá nhân", "Group X",
+        "Kickboxing", "Pilates", "HIIT", "Boxing", "Yoga nâng cao", "Tập sức mạnh"
+    );
+
+    private static final List<String> MASTER_AMENITIES = Arrays.asList(
+        "Phòng xông hơi", "Bể bơi", "Quầy bar dinh dưỡng", "Chỗ đậu xe", "Bể bơi bốn mùa",
+        "Khu vực thư giãn", "Phòng thay đồ tiện nghi", "Nước uống miễn phí", "Quán cà phê"
+    );
+
+    private TextView textViewGreeting;
+    private Button buttonFavorites;
+
+    private float minRatingFilter = 0f; // 0 = không lọc, 3 = chỉ hiện >= 3 sao
+    private int ratingSortOrder = 0; // 0 = không sắp xếp, 1 = tăng dần, 2 = giảm dần
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +113,8 @@ public class MainActivity extends AppCompatActivity {
         setupRecyclerView();
         setupFirebase();
         setupListeners();
+        setupFilterBottomSheet();
+        setupRatingFilterButton();
 
         // Tải dữ liệu lần đầu
         fetchGymDataFromFirestore(false);
@@ -84,7 +125,13 @@ public class MainActivity extends AppCompatActivity {
         progressBarMain = findViewById(R.id.progressBarMain);
         textViewEmptyState = findViewById(R.id.textViewEmptyState);
         recyclerViewGyms = findViewById(R.id.recyclerViewGyms);
-
+        buttonFilter = findViewById(R.id.buttonFilter);
+        textViewGreeting = findViewById(R.id.textViewGreeting);
+        buttonFavorites = findViewById(R.id.buttonFavorites);
+        buttonFavorites.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, FavoriteGymsActivity.class);
+            startActivity(intent);
+        });
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(getString(R.string.main_activity_title));
         }
@@ -125,10 +172,143 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void setupFilterBottomSheet() {
+        filterBottomSheet = new BottomSheetDialog(this);
+        View bottomSheetView = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_filter, null);
+        filterBottomSheet.setContentView(bottomSheetView);
+
+        // Initialize chip groups from bottom sheet
+        bottomSheetChipGroupServices = bottomSheetView.findViewById(R.id.chipGroupServices);
+        bottomSheetChipGroupAmenities = bottomSheetView.findViewById(R.id.chipGroupAmenities);
+
+        // Setup chips in bottom sheet (will now also set checked state)
+        setupFilterChips(bottomSheetChipGroupServices, MASTER_SERVICES, selectedServicesFilter);
+        setupFilterChips(bottomSheetChipGroupAmenities, MASTER_AMENITIES, selectedAmenitiesFilter);
+
+        // Setup buttons
+        bottomSheetView.findViewById(R.id.buttonReset).setOnClickListener(v -> {
+            bottomSheetChipGroupServices.clearCheck();
+            bottomSheetChipGroupAmenities.clearCheck();
+            selectedServicesFilter.clear();
+            selectedAmenitiesFilter.clear();
+            applyFilter(selectedServicesFilter, selectedAmenitiesFilter);
+            filterBottomSheet.dismiss();
+        });
+
+        bottomSheetView.findViewById(R.id.buttonApply).setOnClickListener(v -> {
+            // Get selected chips and apply filter
+            // The selectedServicesFilter and selectedAmenitiesFilter lists are now updated by the OnCheckedStateChangeListener
+            applyFilter(selectedServicesFilter, selectedAmenitiesFilter);
+            filterBottomSheet.dismiss();
+        });
+
+        // Setup main filter button - now also restores checked state when shown
+        buttonFilter.setOnClickListener(v -> {
+            // Re-setup chips to reflect current selected state before showing
+            setupFilterChips(bottomSheetChipGroupServices, MASTER_SERVICES, selectedServicesFilter);
+            setupFilterChips(bottomSheetChipGroupAmenities, MASTER_AMENITIES, selectedAmenitiesFilter);
+            filterBottomSheet.show();
+        });
+
+        // Add listeners to update the selected filter lists when chips are checked/unchecked
+        bottomSheetChipGroupServices.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            selectedServicesFilter = getSelectedChips(bottomSheetChipGroupServices);
+        });
+
+        bottomSheetChipGroupAmenities.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            selectedAmenitiesFilter = getSelectedChips(bottomSheetChipGroupAmenities);
+        });
+    }
+
+    private void setupFilterChips(ChipGroup chipGroup, List<String> items, List<String> selectedItems) {
+        chipGroup.removeAllViews();
+        for (String item : items) {
+            Chip chip = new Chip(this, null, R.style.CustomChipStyle);
+            chip.setText(item);
+            chip.setCheckable(true);
+            chip.setClickable(true);
+            chip.setFocusable(true);
+            // Set the checked state based on selectedItems list
+            chip.setChecked(selectedItems.contains(item));
+            chipGroup.addView(chip);
+        }
+    }
+
+    private List<String> getSelectedChips(ChipGroup chipGroup) {
+        List<String> selected = new ArrayList<>();
+        for (int id : chipGroup.getCheckedChipIds()) {
+            Chip chip = chipGroup.findViewById(id);
+            if (chip != null) {
+                selected.add(chip.getText().toString());
+            }
+        }
+        return selected;
+    }
+
+    private void setupRatingFilterButton() {
+        MaterialButton buttonFilterRating = findViewById(R.id.buttonFilterRating);
+        buttonFilterRating.setOnClickListener(v -> {
+            String[] options = {"Tất cả", "Từ 3★", "Từ 4★", "Từ 5★", "Sắp xếp: Thấp → Cao", "Sắp xếp: Cao → Thấp"};
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Lọc/Sắp xếp theo đánh giá")
+                .setItems(options, (dialog, which) -> {
+                    if (which == 0) { minRatingFilter = 0f; ratingSortOrder = 0; }
+                    else if (which == 1) { minRatingFilter = 3f; ratingSortOrder = 0; }
+                    else if (which == 2) { minRatingFilter = 4f; ratingSortOrder = 0; }
+                    else if (which == 3) { minRatingFilter = 5f; ratingSortOrder = 0; }
+                    else if (which == 4) { ratingSortOrder = 1; } // tăng dần
+                    else if (which == 5) { ratingSortOrder = 2; } // giảm dần
+                    applyFilter(selectedServicesFilter, selectedAmenitiesFilter);
+                })
+                .show();
+        });
+    }
+
+    private void applyFilter(List<String> selectedServices, List<String> selectedAmenities) {
+        List<Gym> filteredList = new ArrayList<>();
+
+        if (originalGymList != null) {
+            for (Gym gym : originalGymList) {
+                boolean matchesSearch = TextUtils.isEmpty(currentSearchQuery) ||
+                        (gym.getName() != null && gym.getName().toLowerCase().contains(currentSearchQuery.toLowerCase())) ||
+                        (gym.getAddress() != null && gym.getAddress().toLowerCase().contains(currentSearchQuery.toLowerCase()));
+
+                boolean matchesServices = selectedServices.isEmpty() ||
+                        (gym.getServices() != null && gym.getServices().containsAll(selectedServices));
+
+                boolean matchesAmenities = selectedAmenities.isEmpty() ||
+                        (gym.getAmenities() != null && gym.getAmenities().containsAll(selectedAmenities));
+
+                boolean matchesRating = gym.getAverageRating() >= minRatingFilter;
+
+                if (matchesSearch && matchesServices && matchesAmenities && matchesRating) {
+                    filteredList.add(gym);
+                }
+            }
+        }
+
+        // Sắp xếp theo số sao nếu có chọn
+        if (ratingSortOrder == 1) {
+            java.util.Collections.sort(filteredList, java.util.Comparator.comparingDouble(Gym::getAverageRating));
+        } else if (ratingSortOrder == 2) {
+            java.util.Collections.sort(filteredList, (g1, g2) -> Float.compare(g2.getAverageRating(), g1.getAverageRating()));
+        }
+
+        gymList.clear();
+        gymList.addAll(filteredList);
+        gymAdapter.notifyDataSetChanged();
+        updateEmptyStateView(gymList, false, currentSearchQuery);
+    }
+
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
 
+        if (id == R.id.action_favorites) {
+            Intent intent = new Intent(MainActivity.this, FavoriteGymsActivity.class);
+            startActivity(intent);
+            return true;
+        }
         if (id == R.id.action_user_profile) {
             Intent intent = new Intent(MainActivity.this, UserProfileActivity.class);
             startActivity(intent);
@@ -175,11 +355,40 @@ public class MainActivity extends AppCompatActivity {
                         Gym gym = document.toObject(Gym.class);
                         if (gym != null) {
                             gym.setId(document.getId());
+                            // Lấy thủ công averageRating và reviewCount nếu có
+                            if (document.contains("averageRating")) {
+                                Double avg = document.getDouble("averageRating");
+                                gym.setAverageRating(avg != null ? avg.floatValue() : 0f);
+                            }
+                            if (document.contains("reviewCount")) {
+                                Long count = document.getLong("reviewCount");
+                                gym.setReviewCount(count != null ? count.intValue() : 0);
+                            }
                             originalGymList.add(gym);
                         }
                     }
                     Log.d(TAG, "Data fetched. Original list size: " + originalGymList.size());
-                    filterGymList(currentSearchQuery); // Áp dụng lại bộ lọc hiện tại
+                    // --- ĐỒNG BỘ TRẠNG THÁI YÊU THÍCH ---
+                    FavoriteGymManager favoriteGymManager = new FavoriteGymManager();
+                    favoriteGymManager.getFavoriteGyms(new FavoriteGymManager.OnFavoriteGymsLoadedListener() {
+                        @Override
+                        public void onFavoriteGymsLoaded(List<Gym> favoriteGyms) {
+                            java.util.Set<String> favoriteGymIds = new java.util.HashSet<>();
+                            for (Gym gym : favoriteGyms) {
+                                favoriteGymIds.add(gym.getId());
+                            }
+                            for (Gym gym : originalGymList) {
+                                gym.setFavorite(favoriteGymIds.contains(gym.getId()));
+                            }
+                            filterGymList(currentSearchQuery); // Áp dụng lại bộ lọc hiện tại
+                        }
+                        @Override
+                        public void onError(String errorMessage) {
+                            // Nếu lỗi, vẫn filter như bình thường (không set favorite)
+                            filterGymList(currentSearchQuery);
+                        }
+                    });
+                    // --- END ĐỒNG BỘ YÊU THÍCH ---
                 } else {
                     Log.d(TAG, "Current data: null from Firestore.");
                     originalGymList.clear();
@@ -266,6 +475,7 @@ public class MainActivity extends AppCompatActivity {
             adminItem.setVisible(isAdmin);
         }
         checkAdminPermission();
+        loadUserProfile(); // Load user profile to get name for greeting
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -294,26 +504,60 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    private void loadUserProfile() {
+        if (currentUser == null) {
+            textViewGreeting.setText("Xin chào!"); // Default greeting if user not logged in
+            return;
+        }
+
+        db.collection("users").document(currentUser.getUid())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String userName = documentSnapshot.getString("name");
+                        if (userName != null && !userName.isEmpty()) {
+                            textViewGreeting.setText("Xin chào, " + userName + "!");
+                        } else {
+                            textViewGreeting.setText("Xin chào!"); // Default if name is empty
+                        }
+                    } else {
+                        textViewGreeting.setText("Xin chào!"); // Default if user document not found
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Lỗi khi tải profile người dùng", e);
+                    textViewGreeting.setText("Xin chào!"); // Default on error
+                });
+    }
+
     private void filterGymList(String searchText) {
-        //searchText đã được trim() từ onQueryTextChange
-        List<Gym> listToFilterFrom = (originalGymList == null) ? new ArrayList<>() : originalGymList;
+        currentSearchQuery = searchText;
         List<Gym> filteredList = new ArrayList<>();
 
-        if (searchText.isEmpty()) {
-            filteredList.addAll(listToFilterFrom);
-        } else {
-            String filterPattern = searchText.toLowerCase();
-            for (Gym gym : listToFilterFrom) {
-                if (gym.getName() != null && gym.getName().toLowerCase().contains(filterPattern)) {
+        if (originalGymList != null) {
+            for (Gym gym : originalGymList) {
+                // Lọc theo tìm kiếm (tên hoặc địa chỉ)
+                boolean matchesSearch = TextUtils.isEmpty(searchText) ||
+                                        (gym.getName() != null && gym.getName().toLowerCase().contains(searchText.toLowerCase())) ||
+                                        (gym.getAddress() != null && gym.getAddress().toLowerCase().contains(searchText.toLowerCase()));
+
+                // Add to filtered list if matches search (chip filtering is handled in applyFilter)
+                if (matchesSearch) {
                     filteredList.add(gym);
                 }
             }
         }
 
+        // Update RecyclerView and empty state
         gymList.clear();
         gymList.addAll(filteredList);
-        gymAdapter.notifyDataSetChanged(); // Hoặc gymAdapter.updateData(filteredList) nếu bạn thích dùng hàm đó
+        gymAdapter.notifyDataSetChanged();
+        updateEmptyStateView(gymList, false, currentSearchQuery);
+    }
 
-        updateEmptyStateView(filteredList, false, searchText);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        fetchGymDataFromFirestore(false);
     }
 }

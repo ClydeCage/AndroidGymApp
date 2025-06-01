@@ -5,7 +5,13 @@ import java.io.Serializable;
 public class Trainer implements Serializable {
     private String id;
     private String name;
-    // Có thể thêm các trường khác như imageUrl, phone, specialization, description, etc.
+    private String imageUrl;
+    private String phone;
+    private String specialization;
+    private String description;
+    private float rating;
+    private int totalRatings;
+    private String gymId; // ID của phòng tập mà trainer làm việc
 
     // Required empty public constructor for Firestore
     public Trainer() {
@@ -31,6 +37,34 @@ public class Trainer implements Serializable {
         return name;
     }
 
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public String getSpecialization() {
+        return specialization;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public float getRating() {
+        return rating;
+    }
+
+    public int getTotalRatings() {
+        return totalRatings;
+    }
+
+    public String getGymId() {
+        return gymId;
+    }
+
     // Setters
     public void setId(String id) {
         this.id = id;
@@ -40,7 +74,31 @@ public class Trainer implements Serializable {
         this.name = name;
     }
 
-    // Add setters for other fields if added
-    // public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
-    // public void setPhone(String phone) { this.phone = phone; }
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public void setSpecialization(String specialization) {
+        this.specialization = specialization;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setRating(float rating) {
+        this.rating = rating;
+    }
+
+    public void setTotalRatings(int totalRatings) {
+        this.totalRatings = totalRatings;
+    }
+
+    public void setGymId(String gymId) {
+        this.gymId = gymId;
+    }
 } 

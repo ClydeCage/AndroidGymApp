@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,54 +7,156 @@
     android:fitsSystemWindows="true"
     tools:context=".MainActivity">
 
-    <!-- Toolbar nếu bạn đã thêm -->
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar_main_custom"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        android:layout_alignParentTop="true"
-        android:visibility="gone"/> <!-- Tạm ẩn nếu bạn dùng ActionBar của Theme, hoặc bỏ hẳn nếu không dùng -->
-
-
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipeRefreshLayoutMain"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/toolbar_main_custom"> <!-- Đặt bên dưới Toolbar nếu có -->
-        <!-- Hoặc android:layout_alignParentTop="true" nếu không có Toolbar tùy chỉnh -->
+        android:orientation="vertical">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerViewGyms"
+        <!-- Background Image and Greeting Area -->
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="4dp"
-            android:clipToPadding="false"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+            android:layout_height="250dp"> <!-- Fixed height for this section -->
 
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+            <!-- Background Image -->
+            <ImageView
+                android:id="@+id/imageViewBackground"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/default_background"/>
 
-    <ProgressBar
-        android:id="@+id/progressBarMain"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:visibility="gone" />
+            <!-- Shadow từ trên xuống -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_gravity="bottom"
+                android:background="@drawable/bg_shadow_top" />
 
-    <TextView
-        android:id="@+id/textViewEmptyState"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:gravity="center"
-        android:padding="16dp"
-        tools:text="Không có phòng gym nào được tìm thấy."
-        android:textSize="18sp"
-        android:textColor="@android:color/darker_gray"
-        android:visibility="gone" />
+            <!-- Shadow từ dưới lên -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_gravity="top"
+                android:background="@drawable/bg_shadow_bottom" />
 
-</RelativeLayout>
+            <!-- Dark overlay for better text visibility (optional) -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#40000000"/>
+
+            <!-- Greeting TextView -->
+            <TextView
+                android:id="@+id/textViewGreeting"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|start"
+                android:layout_marginBottom="16dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                tools:text="Xin chào, Tên người dùng!"
+                android:textColor="@android:color/white"
+                android:textSize="25sp"
+                android:textStyle="bold"/>
+
+            <Button
+                android:id="@+id/buttonFavorites"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|end"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:backgroundTint="@color/color_chip_default_background"
+                android:drawableLeft="@drawable/ic_favorite"
+                android:text="Yêu thích"
+                android:textColor="?attr/elevationOverlayColor" />
+
+        </FrameLayout>
+
+        <!-- Content Area (Filter Button, RecyclerView, etc.) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- Filter Button -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fillViewport="true"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonFilter"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="start"
+                        android:layout_margin="8dp"
+                        android:text="Lọc theo dịch vụ/ tiện ích"
+                        android:textColor="?android:attr/statusBarColor"
+                        app:icon="@drawable/ic_menu_filter"
+                        app:iconTint="?android:attr/statusBarColor" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonFilterRating"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="start"
+                        android:layout_margin="8dp"
+                        android:text="Lọc theo sao"
+                        android:textColor="?android:attr/statusBarColor"
+                        app:icon="@drawable/ic_star"
+                        app:iconTint="?android:attr/statusBarColor" />
+
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <!-- SwipeRefreshLayout and RecyclerView -->
+            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                android:id="@+id/swipeRefreshLayoutMain"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerViewGyms"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="4dp"
+                    android:clipToPadding="false"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+            <!-- ProgressBar and Empty State TextView -->
+            <ProgressBar
+                android:id="@+id/progressBarMain"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center" />
+
+            <TextView
+                android:id="@+id/textViewEmptyState"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:padding="16dp"
+                tools:text="Không có phòng gym nào được tìm thấy."
+                android:textSize="18sp"
+                android:textColor="@android:color/darker_gray"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
