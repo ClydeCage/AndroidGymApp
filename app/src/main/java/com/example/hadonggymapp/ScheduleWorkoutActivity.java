@@ -150,19 +150,27 @@ public class ScheduleWorkoutActivity extends AppCompatActivity {
 
     private void showTrainerSelection() {
         if (trainerList.isEmpty()) {
-            Toast.makeText(this, "Không có huấn luyện viên nào cho phòng tập này!", Toast.LENGTH_SHORT).show();
+            // Nếu không có huấn luyện viên, cho phép đặt lịch không có HLV
+            editTextTrainer.setText("Không có huấn luyện viên");
+            selectedTrainerId = null;
             return;
         }
-        String[] trainerNames = new String[trainerList.size()];
+        String[] trainerNames = new String[trainerList.size() + 1];
+        trainerNames[0] = "Không có huấn luyện viên";
         for (int i = 0; i < trainerList.size(); i++) {
-            trainerNames[i] = trainerList.get(i).getName();
+            trainerNames[i + 1] = trainerList.get(i).getName();
         }
         new androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("Chọn huấn luyện viên")
             .setItems(trainerNames, (dialog, which) -> {
-                Trainer selected = trainerList.get(which);
-                editTextTrainer.setText(selected.getName());
-                selectedTrainerId = selected.getName();
+                if (which == 0) {
+                    editTextTrainer.setText("Không có huấn luyện viên");
+                    selectedTrainerId = null;
+                } else {
+                    Trainer selected = trainerList.get(which - 1);
+                    editTextTrainer.setText(selected.getName());
+                    selectedTrainerId = selected.getName();
+                }
             })
             .show();
     }
@@ -215,14 +223,6 @@ public class ScheduleWorkoutActivity extends AppCompatActivity {
     private boolean validateInputs() {
         if (selectedGym == null) {
             Toast.makeText(this, "Vui lòng chọn phòng tập", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        if (trainerList.isEmpty()) {
-            Toast.makeText(this, "Phòng tập này chưa có huấn luyện viên.", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        if (selectedTrainerId == null) {
-            Toast.makeText(this, "Vui lòng chọn huấn luyện viên", Toast.LENGTH_SHORT).show();
             return false;
         }
         if (selectedDate == null) {

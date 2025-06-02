@@ -42,7 +42,14 @@ public class WorkoutScheduleAdapter extends RecyclerView.Adapter<WorkoutSchedule
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         WorkoutSchedule schedule = schedules.get(position);
         holder.textViewGymName.setText(schedule.getGymName());
-        holder.textViewTrainer.setText("HLV: " + schedule.getTrainerName());
+        
+        // Hiển thị thông tin huấn luyện viên nếu có
+        if (schedule.getTrainerName() != null && !schedule.getTrainerName().isEmpty()) {
+            holder.textViewTrainer.setText("HLV: " + schedule.getTrainerName());
+        } else {
+            holder.textViewTrainer.setText("Không có huấn luyện viên");
+        }
+        
         holder.textViewDateTime.setText(String.format("Ngày: %s - Giờ: %s",
                 dateFormat.format(schedule.getDate()),
                 schedule.getTime()));

@@ -52,7 +52,14 @@ public class WorkoutScheduleDetailActivity extends AppCompatActivity {
             currentSchedule = schedule;
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
             textViewGymName.setText("Phòng tập: " + schedule.getGymName());
-            textViewTrainer.setText("Huấn luyện viên: " + schedule.getTrainerName());
+            
+            // Hiển thị thông tin huấn luyện viên nếu có
+            if (schedule.getTrainerName() != null && !schedule.getTrainerName().isEmpty()) {
+                textViewTrainer.setText("Huấn luyện viên: " + schedule.getTrainerName());
+            } else {
+                textViewTrainer.setText("Huấn luyện viên: Không có");
+            }
+            
             textViewDateTime.setText(String.format("Thời gian: %s - %s",
                     dateFormat.format(schedule.getDate()),
                     schedule.getTime()));
