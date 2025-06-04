@@ -489,8 +489,11 @@ public class MainActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<com.google.firebase.firestore.DocumentSnapshot>() {
                     @Override
                     public void onSuccess(com.google.firebase.firestore.DocumentSnapshot documentSnapshot) {
-                        Boolean admin = documentSnapshot.getBoolean("isAdmin");
-                        isAdmin = (admin != null && admin);
+                        // Kiểm tra cả role và isAdmin
+                        String role = documentSnapshot.getString("role");
+                        Boolean isAdminBool = documentSnapshot.getBoolean("isAdmin");
+                        isAdmin = "admin".equals(role) || (isAdminBool != null && isAdminBool);
+                        
                         if (mainMenu != null) {
                             MenuItem adminItem = mainMenu.findItem(R.id.action_admin);
                             if (adminItem != null) {

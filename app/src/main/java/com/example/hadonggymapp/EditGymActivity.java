@@ -18,6 +18,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -192,7 +194,36 @@ public class EditGymActivity extends AppCompatActivity {
     }
 
     private void saveGym() {
-        // Validate dữ liệu
+        // Kiểm tra quyền admin trước khi thực hiện
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            Toast.makeText(this, "Vui lòng đăng nhập để thực hiện thao tác này", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Kiểm tra role admin
+        db.collection("users").document(currentUser.getUid())
+            .get()
+            .addOnSuccessListener(documentSnapshot -> {
+                String role = documentSnapshot.getString("role");
+                Boolean isAdminBool = documentSnapshot.getBoolean("isAdmin");
+                boolean isAdmin = "admin".equals(role) || (isAdminBool != null && isAdminBool);
+                
+                if (!isAdmin) {
+                    Toast.makeText(EditGymActivity.this, "Bạn không có quyền thực hiện thao tác này", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                // Nếu là admin, tiếp tục lưu dữ liệu
+                saveGymData();
+            })
+            .addOnFailureListener(e -> {
+                Log.e(TAG, "Error checking admin role", e);
+                Toast.makeText(EditGymActivity.this, "Lỗi khi kiểm tra quyền", Toast.LENGTH_SHORT).show();
+            });
+    }
+
+    private void saveGymData() {
+        // Validate input
         String name = editTextGymName.getText().toString().trim();
         String address = editTextGymAddress.getText().toString().trim();
         String phone = editTextGymPhone.getText().toString().trim();
@@ -202,17 +233,12 @@ public class EditGymActivity extends AppCompatActivity {
         String latitudeStr = editTextGymLatitude.getText().toString().trim();
         String longitudeStr = editTextGymLongitude.getText().toString().trim();
 
-        // Kiểm tra các trường bắt buộc
         if (TextUtils.isEmpty(name)) {
             editTextGymName.setError("Vui lòng nhập tên phòng gym");
             return;
         }
-        if (TextUtils.isEmpty(address)) {
-            editTextGymAddress.setError("Vui lòng nhập địa chỉ");
-            return;
-        }
 
-        // Tạo Map chứa dữ liệu
+        // Create gym data map
         Map<String, Object> gymData = new HashMap<>();
         gymData.put("name", name);
         gymData.put("address", address);
@@ -220,12 +246,10 @@ public class EditGymActivity extends AppCompatActivity {
         gymData.put("hours", hours);
         gymData.put("description", description);
         gymData.put("imageUrl", imageUrl);
-
-        // Lưu danh sách dịch vụ và tiện ích đã chọn (từ selectedServices/Amenities)
         gymData.put("services", selectedServices);
         gymData.put("amenities", selectedAmenities);
 
-        // Thêm tọa độ nếu có
+        // Add coordinates if provided
         if (!TextUtils.isEmpty(latitudeStr)) {
             try {
                 double latitude = Double.parseDouble(latitudeStr);
@@ -235,6 +259,7 @@ public class EditGymActivity extends AppCompatActivity {
                 return;
             }
         }
+
         if (!TextUtils.isEmpty(longitudeStr)) {
             try {
                 double longitude = Double.parseDouble(longitudeStr);
@@ -256,7 +281,7 @@ public class EditGymActivity extends AppCompatActivity {
                     })
                     .addOnFailureListener(e -> {
                         Log.e(TAG, "Error updating gym", e);
-                        Toast.makeText(EditGymActivity.this, "Lỗi khi cập nhật phòng gym", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(EditGymActivity.this, "Lỗi khi cập nhật phòng gym: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
         } else {
             // Thêm phòng gym mới
@@ -268,7 +293,7 @@ public class EditGymActivity extends AppCompatActivity {
                     })
                     .addOnFailureListener(e -> {
                         Log.e(TAG, "Error adding gym", e);
-                        Toast.makeText(EditGymActivity.this, "Lỗi khi thêm phòng gym", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(EditGymActivity.this, "Lỗi khi thêm phòng gym: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
         }
     }
